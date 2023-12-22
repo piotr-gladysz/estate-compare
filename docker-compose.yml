@@ -1,0 +1,17 @@
+version: "3.7"
+services:
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data/mongo/db:/data/db
+      - ./data/mongo/config:/data/configdb
+  selenium:
+    image: selenium/standalone-firefox:120.0
+    restart: always
+    container_name: selenium
+    ports:
+      - "4444:4444"
