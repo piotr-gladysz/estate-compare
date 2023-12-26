@@ -12,7 +12,7 @@ var config *Config
 func LoadConfig() error {
 	viper.SetConfigFile(".env")
 	viper.AutomaticEnv()
-	viper.ReadInConfig()
+	_ = viper.ReadInConfig()
 
 	defConfig := getDefaultConfig()
 
@@ -38,7 +38,8 @@ type Config struct {
 	DatabaseUrl  string `mapstructure:"DATABASE_URL"`
 	DatabaseName string `mapstructure:"DATABASE_NAME"`
 
-	CrawlerPeriod time.Duration `mapstructure:"CRAWLER_PERIOD"`
+	CrawlerPeriod     time.Duration `mapstructure:"CRAWLER_PERIOD"`
+	CrawlerPagesCount int           `mapstructure:"CRAWLER_PAGES_COUNT"`
 
 	SeleniumUrl string `mapstructure:"SELENIUM_URL"`
 }
@@ -50,7 +51,8 @@ func getDefaultConfig() *Config {
 		DatabaseUrl:  "mongodb://localhost:27017",
 		DatabaseName: "estate-compare",
 
-		CrawlerPeriod: dur,
+		CrawlerPeriod:     dur,
+		CrawlerPagesCount: 3,
 
 		SeleniumUrl: "http://localhost:4444/wd/hub",
 	}

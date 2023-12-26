@@ -30,6 +30,7 @@ type Factory interface {
 
 type Offer struct {
 	SiteId     string
+	Site       string
 	UpdateTime time.Time
 
 	Name           string
