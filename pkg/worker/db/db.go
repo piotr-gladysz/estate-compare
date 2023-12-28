@@ -13,37 +13,26 @@ const (
 	watchUrlsCollectionName = "watch_urls"
 )
 
-var (
+type DB struct {
 	db           *mongo.Client
 	databaseName string
-)
+}
 
-func InitDB(dbUrl, dbName string) error {
+func NewDB(dbUrl, dbName string) (*DB, error) {
 
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(dbUrl))
 	if err != nil {
 		slog.Error("Failed to connect to database", err.Error())
-		return err
+		return nil, err
 	}
 
 	if err := client.Ping(context.TODO(), nil); err != nil {
 		slog.Error("Failed to connect to database", err.Error())
-		return err
+		return nil, err
 	}
 
-	db = client
-	databaseName = dbName
-	return nil
-}
-
-func OffersCollection() *mongo.Collection {
-	return db.Database(databaseName).Collection(offersCollectionName)
-}
-
-func AlertsCollection() *mongo.Collection {
-	return db.Database(databaseName).Collection(alertsCollectionName)
-}
-
-func WatchUrlsCollection() *mongo.Collection {
-	return db.Database(databaseName).Collection(watchUrlsCollectionName)
+	return &DB{
+		db:           client,
+		databaseName: dbName,
+	}, nil
 }

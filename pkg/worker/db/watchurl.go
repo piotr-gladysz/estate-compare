@@ -7,6 +7,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var _ WatchUrlRepository = (*watchUrlRepository)(nil)
+
 type WatchUrl struct {
 	ID       primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	Url      string             `json:"url" bson:"url"`
@@ -16,16 +18,26 @@ type WatchUrl struct {
 	Disabled bool               `json:"disabled" bson:"disabled"`
 }
 
-type WatchUrlRepository struct {
+type WatchUrlRepository interface {
+	Insert(ctx context.Context, watchUrl *WatchUrl) error
+	InsertIfNotExists(ctx context.Context, watchUrl *WatchUrl) error
+	Update(ctx context.Context, watchUrl *WatchUrl) error
+	Delete(ctx context.Context, id primitive.ObjectID) error
+	FindById(ctx context.Context, id primitive.ObjectID) (*WatchUrl, error)
+	FindBy(ctx context.Context, by primitive.M) ([]*WatchUrl, error)
+	FindAll(ctx context.Context) ([]*WatchUrl, error)
+}
+
+type watchUrlRepository struct {
 	collection *mongo.Collection
 }
 
-func (r *WatchUrlRepository) Insert(ctx context.Context, watchUrl *WatchUrl) error {
+func (r *watchUrlRepository) Insert(ctx context.Context, watchUrl *WatchUrl) error {
 	_, err := r.collection.InsertOne(ctx, watchUrl)
 	return err
 }
 
-func (r *WatchUrlRepository) InsertIfNotExists(ctx context.Context, watchUrl *WatchUrl) error {
+func (r *watchUrlRepository) InsertIfNotExists(ctx context.Context, watchUrl *WatchUrl) error {
 
 	ret := r.collection.FindOneAndUpdate(ctx,
 		primitive.M{"url": watchUrl.Url, "isList": watchUrl.IsList},
@@ -35,23 +47,23 @@ func (r *WatchUrlRepository) InsertIfNotExists(ctx context.Context, watchUrl *Wa
 	return ret.Err()
 }
 
-func (r *WatchUrlRepository) Update(ctx context.Context, watchUrl *WatchUrl) error {
+func (r *watchUrlRepository) Update(ctx context.Context, watchUrl *WatchUrl) error {
 	_, err := r.collection.UpdateOne(ctx, primitive.M{"_id": watchUrl.ID}, primitive.M{"$set": watchUrl})
 	return err
 }
 
-func (r *WatchUrlRepository) Delete(ctx context.Context, id primitive.ObjectID) error {
+func (r *watchUrlRepository) Delete(ctx context.Context, id primitive.ObjectID) error {
 	_, err := r.collection.DeleteOne(ctx, primitive.M{"_id": id})
 	return err
 }
 
-func (r *WatchUrlRepository) FindById(ctx context.Context, id primitive.ObjectID) (*WatchUrl, error) {
+func (r *watchUrlRepository) FindById(ctx context.Context, id primitive.ObjectID) (*WatchUrl, error) {
 	var watchUrl WatchUrl
 	err := r.collection.FindOne(ctx, primitive.M{"_id": id}).Decode(&watchUrl)
 	return &watchUrl, err
 }
 
-func (r *WatchUrlRepository) FindBy(ctx context.Context, by primitive.M) ([]*WatchUrl, error) {
+func (r *watchUrlRepository) FindBy(ctx context.Context, by primitive.M) ([]*WatchUrl, error) {
 	var watchUrls []*WatchUrl
 	cursor, err := r.collection.Find(ctx, by)
 	if err != nil {
@@ -61,7 +73,7 @@ func (r *WatchUrlRepository) FindBy(ctx context.Context, by primitive.M) ([]*Wat
 	return watchUrls, err
 }
 
-func (r *WatchUrlRepository) FindAll(ctx context.Context) ([]*WatchUrl, error) {
+func (r *watchUrlRepository) FindAll(ctx context.Context) ([]*WatchUrl, error) {
 	var watchUrls []*WatchUrl
 	cursor, err := r.collection.Find(ctx, primitive.M{})
 	if err != nil {

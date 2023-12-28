@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+message AddUrlRequest {
+    string url = 1;
+    bool is_list = 2;
+
+}
+
+message GetUrlsRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+}
+
+message SetStateRequest {
+    string id = 1;
+    bool is_disabled = 2;
+}
+
+
+message UrlResponse {
+    string url = 1;
+    bool is_list = 2;
+    string id = 3;
+    bool is_disabled = 4;
+    int64 created = 5;
+    int64 updated = 6;
+}
+
+service WatchUrlService {
+    rpc AddUrl(AddUrlRequest) returns (UrlResponse) {}
+    rpc SetState(SetStateRequest) returns (UrlResponse) {}
+    rpc GetUrls(GetUrlsRequest) returns (stream UrlResponse) {}
+}
+

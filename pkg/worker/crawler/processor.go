@@ -3,23 +3,67 @@ package crawler
 import (
 	"context"
 	"errors"
+	"fmt"
+	"github.com/go-co-op/gocron/v2"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/db"
 	"github.com/tebeka/selenium"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 type SitesProcessor struct {
 	registry     *FactoryRegistry
-	watchUrlRepo *db.WatchUrlRepository
-	offerRepo    *db.OfferRepository
+	watchUrlRepo db.WatchUrlRepository
+	offerRepo    db.OfferRepository
 }
 
-func NewSitesProcessor(registry *FactoryRegistry, watchUrlRepo *db.WatchUrlRepository, offerRepo *db.OfferRepository) *SitesProcessor {
+func NewSitesProcessor(registry *FactoryRegistry, watchUrlRepo db.WatchUrlRepository, offerRepo db.OfferRepository) *SitesProcessor {
 	return &SitesProcessor{
 		registry:     registry,
 		watchUrlRepo: watchUrlRepo,
 		offerRepo:    offerRepo,
+	}
+}
+
+func (s *SitesProcessor) Run() error {
+
+	sched, err := gocron.NewScheduler()
+	if err != nil {
+		slog.Error("failed to create scheduler", "error", err.Error())
+		return err
+	}
+
+	_, err = sched.NewJob(
+		gocron.DurationJob(config.CrawlerPeriod),
+		gocron.NewTask(s.Process),
+	)
+
+	if err != nil {
+		slog.Error("failed to create job", "error", err.Error())
+		return err
+	}
+
+	sched.Start()
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	for {
+		select {
+		case <-c:
+			fmt.Println("SitesProcessor: shutting down")
+			err = sched.Shutdown()
+			if err != nil {
+				slog.Warn("failed to shutdown scheduler", "error", err.Error())
+			}
+			return err
+		default:
+			time.Sleep(time.Millisecond * 100)
+		}
 	}
 }
 

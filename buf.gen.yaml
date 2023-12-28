@@ -1,0 +1,24 @@
+version: v1
+managed:
+  enabled: true
+  go_package_prefix:
+    default: github.com/piotr-gladysz/estate-compare/api
+    except:
+      - buf.build/bufbuild/protovalidate
+plugins:
+
+  # Go types
+  - plugin: buf.build/protocolbuffers/go
+    out: pkg/api
+    opt: paths=source_relative
+  # Go validators (not currently used)
+  - plugin: buf.build/bufbuild/validate-go
+    out: pkg/api
+    opt: paths=source_relative
+  # Go gRPC
+  - plugin: buf.build/grpc/go
+    out: pkg/api
+    opt: paths=source_relative
+  # Go Docs
+  - plugin: buf.build/community/pseudomuto-doc:v1.5.1
+    out: docs/api

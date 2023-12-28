@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+var _ OfferRepository = (*offerRepository)(nil)
+
 type Offer struct {
 	ID primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 
@@ -36,32 +38,40 @@ type OfferHistory struct {
 	Price      int       `json:"price" bson:"price"`
 }
 
-type OfferRepository struct {
+type OfferRepository interface {
+	Insert(ctx context.Context, offer *Offer) error
+	Update(ctx context.Context, offer *Offer) error
+	Delete(ctx context.Context, id primitive.ObjectID) error
+	FindById(ctx context.Context, id primitive.ObjectID) (*Offer, error)
+	FindBy(ctx context.Context, by primitive.M) ([]*Offer, error)
+}
+
+type offerRepository struct {
 	collection *mongo.Collection
 }
 
-func (r *OfferRepository) Insert(ctx context.Context, offer *Offer) error {
+func (r *offerRepository) Insert(ctx context.Context, offer *Offer) error {
 	_, err := r.collection.InsertOne(ctx, offer)
 	return err
 }
 
-func (r *OfferRepository) Update(ctx context.Context, offer *Offer) error {
+func (r *offerRepository) Update(ctx context.Context, offer *Offer) error {
 	_, err := r.collection.UpdateOne(ctx, primitive.M{"_id": offer.ID}, primitive.M{"$set": offer})
 	return err
 }
 
-func (r *OfferRepository) Delete(ctx context.Context, id primitive.ObjectID) error {
+func (r *offerRepository) Delete(ctx context.Context, id primitive.ObjectID) error {
 	_, err := r.collection.DeleteOne(ctx, primitive.M{"_id": id})
 	return err
 }
 
-func (r *OfferRepository) FindById(ctx context.Context, id primitive.ObjectID) (*Offer, error) {
+func (r *offerRepository) FindById(ctx context.Context, id primitive.ObjectID) (*Offer, error) {
 	var offer Offer
 	err := r.collection.FindOne(ctx, primitive.M{"_id": id}).Decode(&offer)
 	return &offer, err
 }
 
-func (r *OfferRepository) FindBy(ctx context.Context, by primitive.M) ([]*Offer, error) {
+func (r *offerRepository) FindBy(ctx context.Context, by primitive.M) ([]*Offer, error) {
 	var offers []*Offer
 	cursor, err := r.collection.Find(ctx, by)
 	if err != nil {
