@@ -30,7 +30,7 @@ const (
 type WatchUrlServiceClient interface {
 	AddUrl(ctx context.Context, in *AddUrlRequest, opts ...grpc.CallOption) (*UrlResponse, error)
 	SetState(ctx context.Context, in *SetStateRequest, opts ...grpc.CallOption) (*UrlResponse, error)
-	GetUrls(ctx context.Context, in *GetUrlsRequest, opts ...grpc.CallOption) (WatchUrlService_GetUrlsClient, error)
+	GetUrls(ctx context.Context, in *GetUrlsRequest, opts ...grpc.CallOption) (*UrlListResponse, error)
 }
 
 type watchUrlServiceClient struct {
@@ -59,36 +59,13 @@ func (c *watchUrlServiceClient) SetState(ctx context.Context, in *SetStateReques
 	return out, nil
 }
 
-func (c *watchUrlServiceClient) GetUrls(ctx context.Context, in *GetUrlsRequest, opts ...grpc.CallOption) (WatchUrlService_GetUrlsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &WatchUrlService_ServiceDesc.Streams[0], WatchUrlService_GetUrls_FullMethodName, opts...)
+func (c *watchUrlServiceClient) GetUrls(ctx context.Context, in *GetUrlsRequest, opts ...grpc.CallOption) (*UrlListResponse, error) {
+	out := new(UrlListResponse)
+	err := c.cc.Invoke(ctx, WatchUrlService_GetUrls_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &watchUrlServiceGetUrlsClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type WatchUrlService_GetUrlsClient interface {
-	Recv() (*UrlResponse, error)
-	grpc.ClientStream
-}
-
-type watchUrlServiceGetUrlsClient struct {
-	grpc.ClientStream
-}
-
-func (x *watchUrlServiceGetUrlsClient) Recv() (*UrlResponse, error) {
-	m := new(UrlResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 // WatchUrlServiceServer is the server API for WatchUrlService service.
@@ -97,7 +74,7 @@ func (x *watchUrlServiceGetUrlsClient) Recv() (*UrlResponse, error) {
 type WatchUrlServiceServer interface {
 	AddUrl(context.Context, *AddUrlRequest) (*UrlResponse, error)
 	SetState(context.Context, *SetStateRequest) (*UrlResponse, error)
-	GetUrls(*GetUrlsRequest, WatchUrlService_GetUrlsServer) error
+	GetUrls(context.Context, *GetUrlsRequest) (*UrlListResponse, error)
 	mustEmbedUnimplementedWatchUrlServiceServer()
 }
 
@@ -111,8 +88,8 @@ func (UnimplementedWatchUrlServiceServer) AddUrl(context.Context, *AddUrlRequest
 func (UnimplementedWatchUrlServiceServer) SetState(context.Context, *SetStateRequest) (*UrlResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetState not implemented")
 }
-func (UnimplementedWatchUrlServiceServer) GetUrls(*GetUrlsRequest, WatchUrlService_GetUrlsServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetUrls not implemented")
+func (UnimplementedWatchUrlServiceServer) GetUrls(context.Context, *GetUrlsRequest) (*UrlListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUrls not implemented")
 }
 func (UnimplementedWatchUrlServiceServer) mustEmbedUnimplementedWatchUrlServiceServer() {}
 
@@ -163,25 +140,22 @@ func _WatchUrlService_SetState_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _WatchUrlService_GetUrls_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(GetUrlsRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
+func _WatchUrlService_GetUrls_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUrlsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
 	}
-	return srv.(WatchUrlServiceServer).GetUrls(m, &watchUrlServiceGetUrlsServer{stream})
-}
-
-type WatchUrlService_GetUrlsServer interface {
-	Send(*UrlResponse) error
-	grpc.ServerStream
-}
-
-type watchUrlServiceGetUrlsServer struct {
-	grpc.ServerStream
-}
-
-func (x *watchUrlServiceGetUrlsServer) Send(m *UrlResponse) error {
-	return x.ServerStream.SendMsg(m)
+	if interceptor == nil {
+		return srv.(WatchUrlServiceServer).GetUrls(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WatchUrlService_GetUrls_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WatchUrlServiceServer).GetUrls(ctx, req.(*GetUrlsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 // WatchUrlService_ServiceDesc is the grpc.ServiceDesc for WatchUrlService service.
@@ -199,13 +173,11 @@ var WatchUrlService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "SetState",
 			Handler:    _WatchUrlService_SetState_Handler,
 		},
-	},
-	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "GetUrls",
-			Handler:       _WatchUrlService_GetUrls_Handler,
-			ServerStreams: true,
+			MethodName: "GetUrls",
+			Handler:    _WatchUrlService_GetUrls_Handler,
 		},
 	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "watch_url.proto",
 }

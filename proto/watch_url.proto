@@ -27,10 +27,13 @@ message UrlResponse {
     int64 created = 5;
     int64 updated = 6;
 }
+message UrlListResponse {
+    repeated UrlResponse urls = 1;
+}
 
 service WatchUrlService {
     rpc AddUrl(AddUrlRequest) returns (UrlResponse) {}
     rpc SetState(SetStateRequest) returns (UrlResponse) {}
-    rpc GetUrls(GetUrlsRequest) returns (stream UrlResponse) {}
+    rpc GetUrls(GetUrlsRequest) returns (UrlListResponse) {}
 }
 

@@ -191,6 +191,10 @@
                 </li>
               
                 <li>
+                  <a href="#api.UrlListResponse"><span class="badge">M</span>UrlListResponse</a>
+                </li>
+              
+                <li>
                   <a href="#api.UrlResponse"><span class="badge">M</span>UrlResponse</a>
                 </li>
               
@@ -309,6 +313,30 @@
 
         
       
+        <h3 id="api.UrlListResponse">UrlListResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>urls</td>
+                  <td><a href="#api.UrlResponse">UrlResponse</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
         <h3 id="api.UrlResponse">UrlResponse</h3>
         <p></p>
 
@@ -399,7 +427,7 @@
               <tr>
                 <td>GetUrls</td>
                 <td><a href="#api.GetUrlsRequest">GetUrlsRequest</a></td>
-                <td><a href="#api.UrlResponse">UrlResponse</a> stream</td>
+                <td><a href="#api.UrlListResponse">UrlListResponse</a></td>
                 <td><p></p></td>
               </tr>
             

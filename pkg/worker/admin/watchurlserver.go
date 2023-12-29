@@ -9,8 +9,6 @@ import (
 	"time"
 )
 
-var _ api.WatchUrlServiceServer = (*WatchUrlServer)(nil)
-
 type WatchUrlServer struct {
 	api.UnimplementedWatchUrlServiceServer
 	repo db.WatchUrlRepository
@@ -67,10 +65,25 @@ func (w *WatchUrlServer) SetState(ctx context.Context, request *api.SetStateRequ
 	return w.watchUrlToResponse(url), nil
 }
 
-func (w *WatchUrlServer) GetUrls(request *api.GetUrlsRequest, server api.WatchUrlService_GetUrlsServer) error {
+func (w *WatchUrlServer) GetUrls(ctx context.Context, request *api.GetUrlsRequest) (*api.UrlListResponse, error) {
 	limit := request.PageSize
 	skip := (request.Page - 1) * request.PageSize
-	panic("implement me")
+
+	urls, err := w.repo.FindAll(ctx, int64(skip), int64(limit))
+
+	if err != nil {
+		return nil, err
+	}
+
+	urlResponses := make([]*api.UrlResponse, len(urls))
+
+	for i, url := range urls {
+		urlResponses[i] = w.watchUrlToResponse(url)
+	}
+
+	return &api.UrlListResponse{
+		Urls: urlResponses,
+	}, nil
 }
 
 func (w *WatchUrlServer) watchUrlToResponse(url *db.WatchUrl) *api.UrlResponse {
