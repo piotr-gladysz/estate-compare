@@ -1,21 +1,23 @@
 syntax = "proto3";
+package api;
+
+import "google/protobuf/timestamp.proto";
+import "buf/validate/validate.proto";
 
 message AddUrlRequest {
     string url = 1;
     bool is_list = 2;
-
 }
 
 message GetUrlsRequest {
-    int32 page = 1;
-    int32 page_size = 2;
+    int32 page = 1 [(buf.validate.field).int32.gte = 1];
+    int32 page_size = 2 [(buf.validate.field).int32.gte = 1];
 }
 
 message SetStateRequest {
     string id = 1;
     bool is_disabled = 2;
 }
-
 
 message UrlResponse {
     string url = 1;

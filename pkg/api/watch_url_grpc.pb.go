@@ -19,9 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	WatchUrlService_AddUrl_FullMethodName   = "/WatchUrlService/AddUrl"
-	WatchUrlService_SetState_FullMethodName = "/WatchUrlService/SetState"
-	WatchUrlService_GetUrls_FullMethodName  = "/WatchUrlService/GetUrls"
+	WatchUrlService_AddUrl_FullMethodName   = "/api.WatchUrlService/AddUrl"
+	WatchUrlService_SetState_FullMethodName = "/api.WatchUrlService/SetState"
+	WatchUrlService_GetUrls_FullMethodName  = "/api.WatchUrlService/GetUrls"
 )
 
 // WatchUrlServiceClient is the client API for WatchUrlService service.
@@ -188,7 +188,7 @@ func (x *watchUrlServiceGetUrlsServer) Send(m *UrlResponse) error {
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var WatchUrlService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "WatchUrlService",
+	ServiceName: "api.WatchUrlService",
 	HandlerType: (*WatchUrlServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

@@ -6,13 +6,12 @@ managed:
     except:
       - buf.build/bufbuild/protovalidate
 plugins:
-
-  # Go types
-  - plugin: buf.build/protocolbuffers/go
+  # Go validators
+  - plugin: buf.build/bufbuild/validate-go
     out: pkg/api
     opt: paths=source_relative
-  # Go validators (not currently used)
-  - plugin: buf.build/bufbuild/validate-go
+  # Go types
+  - plugin: buf.build/protocolbuffers/go
     out: pkg/api
     opt: paths=source_relative
   # Go gRPC

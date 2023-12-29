@@ -13,8 +13,8 @@ type WatchUrl struct {
 	ID       primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	Url      string             `json:"url" bson:"url"`
 	IsList   bool               `json:"isList" bson:"isList"`
-	Created  int64              `json:"created" bson:"created"`
-	Updated  int64              `json:"updated" bson:"updated"`
+	Created  primitive.DateTime `json:"created" bson:"created"`
+	Updated  primitive.DateTime `json:"updated" bson:"updated"`
 	Disabled bool               `json:"disabled" bson:"disabled"`
 }
 
@@ -25,7 +25,7 @@ type WatchUrlRepository interface {
 	Delete(ctx context.Context, id primitive.ObjectID) error
 	FindById(ctx context.Context, id primitive.ObjectID) (*WatchUrl, error)
 	FindBy(ctx context.Context, by primitive.M) ([]*WatchUrl, error)
-	FindAll(ctx context.Context) ([]*WatchUrl, error)
+	FindAll(ctx context.Context, limit int, skip int) ([]*WatchUrl, error)
 }
 
 type watchUrlRepository struct {
@@ -33,7 +33,8 @@ type watchUrlRepository struct {
 }
 
 func (r *watchUrlRepository) Insert(ctx context.Context, watchUrl *WatchUrl) error {
-	_, err := r.collection.InsertOne(ctx, watchUrl)
+	res, err := r.collection.InsertOne(ctx, watchUrl)
+	watchUrl.ID = res.InsertedID.(primitive.ObjectID)
 	return err
 }
 
@@ -59,6 +60,7 @@ func (r *watchUrlRepository) Delete(ctx context.Context, id primitive.ObjectID) 
 
 func (r *watchUrlRepository) FindById(ctx context.Context, id primitive.ObjectID) (*WatchUrl, error) {
 	var watchUrl WatchUrl
+
 	err := r.collection.FindOne(ctx, primitive.M{"_id": id}).Decode(&watchUrl)
 	return &watchUrl, err
 }
@@ -66,19 +68,25 @@ func (r *watchUrlRepository) FindById(ctx context.Context, id primitive.ObjectID
 func (r *watchUrlRepository) FindBy(ctx context.Context, by primitive.M) ([]*WatchUrl, error) {
 	var watchUrls []*WatchUrl
 	cursor, err := r.collection.Find(ctx, by)
+
 	if err != nil {
 		return nil, err
 	}
+
 	err = cursor.All(nil, &watchUrls)
 	return watchUrls, err
 }
 
-func (r *watchUrlRepository) FindAll(ctx context.Context) ([]*WatchUrl, error) {
+func (r *watchUrlRepository) FindAll(ctx context.Context, limit int, skip int) ([]*WatchUrl, error) {
 	var watchUrls []*WatchUrl
-	cursor, err := r.collection.Find(ctx, primitive.M{})
+
+	opts := options.Find().SetSkip(int64(skip)).SetLimit(int64(limit))
+	cursor, err := r.collection.Find(ctx, primitive.M{}, opts)
+
 	if err != nil {
 		return nil, err
 	}
+
 	err = cursor.All(ctx, &watchUrls)
 	return watchUrls, err
 }

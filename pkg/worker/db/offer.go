@@ -4,7 +4,6 @@ import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"time"
 )
 
 var _ OfferRepository = (*offerRepository)(nil)
@@ -12,9 +11,10 @@ var _ OfferRepository = (*offerRepository)(nil)
 type Offer struct {
 	ID primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 
-	SiteId     string    `json:"siteId" bson:"siteId"`
-	Site       string    `json:"site" bson:"site"`
-	UpdateTime time.Time `json:"updateTime" bson:"updateTime"`
+	SiteId  string             `json:"siteId" bson:"siteId"`
+	Site    string             `json:"site" bson:"site"`
+	Updated primitive.DateTime `json:"updated" bson:"updated"`
+	Created primitive.DateTime `json:"created" bson:"created"`
 
 	Name           string   `json:"name" bson:"name"`
 	Url            string   `json:"url" bson:"url"`
@@ -34,8 +34,8 @@ type Offer struct {
 }
 
 type OfferHistory struct {
-	UpdateTime time.Time `json:"updateTime" bson:"updateTime"`
-	Price      int       `json:"price" bson:"price"`
+	Updated primitive.DateTime `json:"updated" bson:"updated"`
+	Price   int                `json:"price" bson:"price"`
 }
 
 type OfferRepository interface {
@@ -51,7 +51,8 @@ type offerRepository struct {
 }
 
 func (r *offerRepository) Insert(ctx context.Context, offer *Offer) error {
-	_, err := r.collection.InsertOne(ctx, offer)
+	res, err := r.collection.InsertOne(ctx, offer)
+	offer.ID = res.InsertedID.(primitive.ObjectID)
 	return err
 }
 

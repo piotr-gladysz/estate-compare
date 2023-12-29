@@ -173,10 +173,10 @@ func (s *SitesProcessor) ProcessSite(ctx context.Context, wd selenium.WebDriver,
 			return nil
 		}
 
-		existingOffer.UpdateTime = offer.UpdateTime
+		existingOffer.Updated = primitive.NewDateTimeFromTime(offer.UpdateTime)
 		existingOffer.History = append(existingOffer.History, &db.OfferHistory{
-			UpdateTime: offer.UpdateTime,
-			Price:      offer.Price,
+			Updated: primitive.NewDateTimeFromTime(offer.UpdateTime),
+			Price:   offer.Price,
 		})
 		err = s.offerRepo.Update(ctx, existingOffer)
 		if err != nil {
@@ -192,7 +192,7 @@ func (s *SitesProcessor) MapOfferToDB(offer *Offer, url string) *db.Offer {
 	return &db.Offer{
 		SiteId:         offer.SiteId,
 		Site:           offer.Site,
-		UpdateTime:     offer.UpdateTime,
+		Updated:        primitive.NewDateTimeFromTime(offer.UpdateTime),
 		Name:           offer.Name,
 		Url:            url,
 		Area:           offer.Area,
@@ -208,8 +208,8 @@ func (s *SitesProcessor) MapOfferToDB(offer *Offer, url string) *db.Offer {
 		Media:          offer.Media,
 		History: []*db.OfferHistory{
 			{
-				UpdateTime: offer.UpdateTime,
-				Price:      offer.Price,
+				Updated: primitive.NewDateTimeFromTime(offer.UpdateTime),
+				Price:   offer.Price,
 			},
 		},
 	}
