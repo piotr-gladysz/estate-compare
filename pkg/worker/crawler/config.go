@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+// TODO: move to separate package
+
 var config *Config
 
 func LoadConfig() error {
@@ -42,6 +44,10 @@ type Config struct {
 	CrawlerPagesCount int           `mapstructure:"CRAWLER_PAGES_COUNT"`
 
 	SeleniumUrl string `mapstructure:"SELENIUM_URL"`
+
+	ServerEnabled bool   `mapstructure:"SERVER_ENABLED"`
+	ServerPort    int    `mapstructure:"SERVER_PORT"`
+	ServerIp      string `mapstructure:"SERVER_IP"`
 }
 
 func getDefaultConfig() *Config {
@@ -55,5 +61,9 @@ func getDefaultConfig() *Config {
 		CrawlerPagesCount: 3,
 
 		SeleniumUrl: "http://localhost:4444/wd/hub",
+
+		ServerEnabled: true,
+		ServerPort:    11080,
+		ServerIp:      "0.0.0.0",
 	}
 }

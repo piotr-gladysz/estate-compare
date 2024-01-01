@@ -1,7 +1,10 @@
 package main
 
 import (
+	"context"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/admin"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/crawler"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/db"
 	"log/slog"
 	"os"
 )
@@ -22,5 +25,50 @@ func init() {
 }
 
 func main() {
+
+	conf := crawler.GetConfig()
+	ctx := context.Background()
+
+	d, err := db.NewDB(ctx, conf.DatabaseUrl, conf.DatabaseName)
+
+	if err != nil {
+		slog.Error("failed to create db", "error", err.Error())
+		return
+	}
+
+	defer func() {
+		err := d.Close(context.Background())
+		if err != nil {
+			slog.Error("failed to close db", "error", err.Error())
+		}
+	}()
+
+	if conf.ServerEnabled {
+		server := admin.NewServer(conf.ServerPort, conf.ServerIp, d.GetWatchUrlRepository())
+		err = server.Run()
+		if err != nil {
+			slog.Error("failed to run server", "error", err.Error())
+			panic(err)
+		}
+
+		defer func() {
+			err := server.Close()
+			if err != nil {
+				slog.Error("failed to close server", "error", err.Error())
+			}
+		}()
+	}
+
+	processor := crawler.NewSitesProcessor(
+		crawler.NewCrawlerFactoryRegistry(),
+		d.GetWatchUrlRepository(),
+		d.GetOfferRepository(),
+	)
+
+	err = processor.Run()
+	if err != nil {
+		slog.Error("failed to run processor", "error", err.Error())
+		panic(err)
+	}
 
 }
