@@ -44,7 +44,7 @@ func main() {
 	}()
 
 	if conf.ServerEnabled {
-		server := admin.NewServer(conf.ServerPort, conf.ServerIp, d.GetWatchUrlRepository())
+		server := admin.NewServer(conf.ServerPort, conf.ServerIp, d.GetWatchUrlRepository(), d.GetOfferRepository())
 		err = server.Run()
 		if err != nil {
 			slog.Error("failed to run server", "error", err.Error())

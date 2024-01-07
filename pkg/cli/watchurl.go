@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"context"
 	"github.com/piotr-gladysz/estate-compare/pkg/api"
 	"github.com/spf13/cobra"
 )
@@ -26,7 +25,8 @@ func newAddWatchUrlCmd() *cobra.Command {
 				Url:    url,
 				IsList: isList,
 			}
-			ret, err := client.AddUrl(context.Background(), in)
+
+			ret, err := client.AddUrl(cmd.Context(), in)
 			if err != nil {
 				return err
 			}
@@ -63,7 +63,7 @@ func newListWatchUrlCmd() *cobra.Command {
 				Page:     page,
 				PageSize: pageSize,
 			}
-			ret, err := client.GetUrls(context.Background(), in)
+			ret, err := client.GetUrls(cmd.Context(), in)
 			if err != nil {
 				return err
 			}
@@ -100,7 +100,7 @@ func newSetWatchUrlStateCmd() *cobra.Command {
 				IsDisabled: isDisabled,
 			}
 
-			ret, err := client.SetState(context.Background(), in)
+			ret, err := client.SetState(cmd.Context(), in)
 			if err != nil {
 				return err
 			}

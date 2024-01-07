@@ -4,6 +4,7 @@ import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var _ OfferRepository = (*offerRepository)(nil)
@@ -44,6 +45,7 @@ type OfferRepository interface {
 	Delete(ctx context.Context, id primitive.ObjectID) error
 	FindById(ctx context.Context, id primitive.ObjectID) (*Offer, error)
 	FindBy(ctx context.Context, by primitive.M) ([]*Offer, error)
+	FindAll(ctx context.Context, limit int64, skip int64) ([]*Offer, error)
 }
 
 type offerRepository struct {
@@ -75,6 +77,17 @@ func (r *offerRepository) FindById(ctx context.Context, id primitive.ObjectID) (
 func (r *offerRepository) FindBy(ctx context.Context, by primitive.M) ([]*Offer, error) {
 	var offers []*Offer
 	cursor, err := r.collection.Find(ctx, by)
+	if err != nil {
+		return nil, err
+	}
+
+	err = cursor.All(nil, &offers)
+	return offers, err
+}
+
+func (r *offerRepository) FindAll(ctx context.Context, limit int64, skip int64) ([]*Offer, error) {
+	var offers []*Offer
+	cursor, err := r.collection.Find(ctx, primitive.M{}, options.Find().SetLimit(limit).SetSkip(skip))
 	if err != nil {
 		return nil, err
 	}

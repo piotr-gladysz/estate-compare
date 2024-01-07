@@ -27,3 +27,54 @@ func drawWatchUrlList(writer io.Writer, urls []*api.UrlResponse) {
 
 	t.Render()
 }
+
+func drawOfferList(writer io.Writer, offers []*api.OfferResponse) {
+	t := table.NewWriter()
+	t.SetOutputMirror(writer)
+	t.AppendHeader(table.Row{"#", "Id", "SiteId", "Site", "Created", "Updated", "Name", "Url", "Area", "Rooms",
+		"Floor", "BuildingFloors", "Year", "Heating", "Market", "Window", "Elevator", "Balcony", "Media"})
+
+	for i, offer := range offers {
+		t.AppendRow(
+			table.Row{
+				i,
+				offer.Id,
+				offer.SiteId,
+				offer.Site,
+				time.Unix(offer.Created, 0).Format(time.RFC3339),
+				time.Unix(offer.Updated, 0).Format(time.RFC3339),
+				offer.Name,
+				offer.Url,
+				offer.Area,
+				offer.Rooms,
+				offer.Floor,
+				offer.BuildingFloors,
+				offer.Year,
+				offer.Heating,
+				offer.Market,
+				offer.Window,
+				offer.Elevator,
+				offer.Balcony,
+				offer.Media,
+			})
+	}
+
+	t.Render()
+}
+
+func drawOfferHistory(writer io.Writer, histories []*api.OfferHistory) {
+	t := table.NewWriter()
+	t.SetOutputMirror(writer)
+	t.AppendHeader(table.Row{"#", "Updated", "Price"})
+
+	for i, history := range histories {
+		t.AppendRow(
+			table.Row{
+				i,
+				time.Unix(history.Updated, 0).Format(time.RFC3339),
+				history.Price,
+			})
+	}
+
+	t.Render()
+}

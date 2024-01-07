@@ -12,6 +12,7 @@ import (
 
 type Server struct {
 	watchUrlRepo db.WatchUrlRepository
+	offerRepo    db.OfferRepository
 
 	port int
 	ip   string
@@ -20,8 +21,8 @@ type Server struct {
 	listener net.Listener
 }
 
-func NewServer(port int, ip string, watchUrlRepo db.WatchUrlRepository) *Server {
-	return &Server{watchUrlRepo: watchUrlRepo, port: port, ip: ip}
+func NewServer(port int, ip string, watchUrlRepo db.WatchUrlRepository, offerRepo db.OfferRepository) *Server {
+	return &Server{watchUrlRepo: watchUrlRepo, offerRepo: offerRepo, port: port, ip: ip}
 }
 
 func (s *Server) Run() error {
@@ -33,6 +34,7 @@ func (s *Server) Run() error {
 	grpcServer := grpc.NewServer()
 
 	api.RegisterWatchUrlServiceServer(grpcServer, NewWatchUrlServer(s.watchUrlRepo))
+	api.RegisterOfferServiceServer(grpcServer, NewOfferServer(s.offerRepo))
 
 	s.listener = lis
 	s.server = grpcServer

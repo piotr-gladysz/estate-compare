@@ -26,7 +26,18 @@ func CreateCLICommand() *cobra.Command {
 	watchUrl.AddCommand(newListWatchUrlCmd())
 	watchUrl.AddCommand(newSetWatchUrlStateCmd())
 
+	offer := &cobra.Command{
+		Use:   "offer",
+		Long:  "Offer commands",
+		Short: "Offer commands",
+	}
+
+	offer.AddCommand(newGetOfferCmd())
+	offer.AddCommand(newListOfferCmd())
+
 	root.AddCommand(watchUrl)
+	root.AddCommand(offer)
+
 	return root
 }
 
