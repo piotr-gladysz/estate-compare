@@ -43,8 +43,15 @@ func main() {
 		}
 	}()
 
+	processor := crawler.NewSitesProcessor(
+		ctx,
+		crawler.NewCrawlerFactoryRegistry(),
+		d.GetWatchUrlRepository(),
+		d.GetOfferRepository(),
+	)
+
 	if conf.ServerEnabled {
-		server := admin.NewServer(conf.ServerPort, conf.ServerIp, d.GetWatchUrlRepository(), d.GetOfferRepository())
+		server := admin.NewServer(conf.ServerPort, conf.ServerIp, d.GetWatchUrlRepository(), d.GetOfferRepository(), processor)
 		err = server.Run()
 		if err != nil {
 			slog.Error("failed to run server", "error", err.Error())
@@ -58,12 +65,6 @@ func main() {
 			}
 		}()
 	}
-
-	processor := crawler.NewSitesProcessor(
-		crawler.NewCrawlerFactoryRegistry(),
-		d.GetWatchUrlRepository(),
-		d.GetOfferRepository(),
-	)
 
 	err = processor.Run()
 	if err != nil {

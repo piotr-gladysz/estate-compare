@@ -35,8 +35,19 @@ func CreateCLICommand() *cobra.Command {
 	offer.AddCommand(newGetOfferCmd())
 	offer.AddCommand(newListOfferCmd())
 
+	processor := &cobra.Command{
+		Use:   "processor",
+		Long:  "Processor commands",
+		Short: "Processor commands",
+	}
+
+	processor.AddCommand(newProcessorStartCmd())
+	processor.AddCommand(newProcessorStopCmd())
+	processor.AddCommand(newProcessorStatusCmd())
+
 	root.AddCommand(watchUrl)
 	root.AddCommand(offer)
+	root.AddCommand(processor)
 
 	return root
 }

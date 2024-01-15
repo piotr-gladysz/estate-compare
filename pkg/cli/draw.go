@@ -78,3 +78,16 @@ func drawOfferHistory(writer io.Writer, histories []*api.OfferHistory) {
 
 	t.Render()
 }
+
+func drawProcessorStatus(writer io.Writer, state *api.ProcessingStatus) {
+	t := table.NewWriter()
+	t.SetOutputMirror(writer)
+
+	t.AppendHeader(table.Row{"Param", "Value"})
+
+	t.AppendRow(table.Row{"IsRunning", state.IsRunning})
+	t.AppendRow(table.Row{"LastRun", state.LastRun.AsTime().Format(time.RFC3339)})
+	t.AppendRow(table.Row{"NextRun", state.NextRun.AsTime().Format(time.RFC3339)})
+
+	t.Render()
+}

@@ -14,6 +14,8 @@ type Server struct {
 	watchUrlRepo db.WatchUrlRepository
 	offerRepo    db.OfferRepository
 
+	control ProcessorControl
+
 	port int
 	ip   string
 
@@ -21,8 +23,8 @@ type Server struct {
 	listener net.Listener
 }
 
-func NewServer(port int, ip string, watchUrlRepo db.WatchUrlRepository, offerRepo db.OfferRepository) *Server {
-	return &Server{watchUrlRepo: watchUrlRepo, offerRepo: offerRepo, port: port, ip: ip}
+func NewServer(port int, ip string, watchUrlRepo db.WatchUrlRepository, offerRepo db.OfferRepository, control ProcessorControl) *Server {
+	return &Server{watchUrlRepo: watchUrlRepo, offerRepo: offerRepo, control: control, port: port, ip: ip}
 }
 
 func (s *Server) Run() error {
@@ -35,6 +37,7 @@ func (s *Server) Run() error {
 
 	api.RegisterWatchUrlServiceServer(grpcServer, NewWatchUrlServer(s.watchUrlRepo))
 	api.RegisterOfferServiceServer(grpcServer, NewOfferServer(s.offerRepo))
+	api.RegisterProcessorServiceServer(grpcServer, NewProcessorServer(s.control))
 
 	s.listener = lis
 	s.server = grpcServer

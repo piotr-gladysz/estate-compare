@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -19,13 +20,21 @@ type SitesProcessor struct {
 	registry     *FactoryRegistry
 	watchUrlRepo db.WatchUrlRepository
 	offerRepo    db.OfferRepository
+
+	parentCtx context.Context
+
+	procMux    sync.Mutex
+	procJob    gocron.Job
+	procCtx    context.Context
+	procCancel context.CancelFunc
 }
 
-func NewSitesProcessor(registry *FactoryRegistry, watchUrlRepo db.WatchUrlRepository, offerRepo db.OfferRepository) *SitesProcessor {
+func NewSitesProcessor(ctx context.Context, registry *FactoryRegistry, watchUrlRepo db.WatchUrlRepository, offerRepo db.OfferRepository) *SitesProcessor {
 	return &SitesProcessor{
 		registry:     registry,
 		watchUrlRepo: watchUrlRepo,
 		offerRepo:    offerRepo,
+		parentCtx:    ctx,
 	}
 }
 
@@ -37,10 +46,12 @@ func (s *SitesProcessor) Run() error {
 		return err
 	}
 
-	_, err = sched.NewJob(
+	job, err := sched.NewJob(
 		gocron.DurationJob(config.CrawlerPeriod),
 		gocron.NewTask(s.Process),
 	)
+
+	s.procJob = job
 
 	if err != nil {
 		slog.Error("failed to create job", "error", err.Error())
@@ -69,6 +80,22 @@ func (s *SitesProcessor) Run() error {
 
 func (s *SitesProcessor) Process() error {
 
+	s.procMux.Lock()
+	ctx, cancel := context.WithCancel(s.parentCtx)
+
+	s.procCtx = ctx
+	s.procCancel = cancel
+
+	s.procMux.Unlock()
+
+	defer func() {
+		s.procMux.Lock()
+		s.procCancel()
+		s.procCtx = nil
+		s.procCancel = nil
+		s.procMux.Unlock()
+	}()
+
 	wd, err := GetSelenium()
 	defer func(wd selenium.WebDriver) {
 		err := wd.Quit()
@@ -80,8 +107,6 @@ func (s *SitesProcessor) Process() error {
 		slog.Error("failed to get selenium", "error", err.Error())
 		return err
 	}
-
-	ctx := context.Background()
 
 	lists, err := s.watchUrlRepo.FindBy(ctx, primitive.M{"isList": true, "disabled": false})
 	if err != nil {
@@ -127,6 +152,9 @@ func (s *SitesProcessor) ProcessSiteLink(ctx context.Context, wd selenium.WebDri
 			err = s.watchUrlRepo.InsertIfNotExists(ctx, watchUrl)
 			if err != nil {
 				slog.Warn("failed to add site link", "url", url, "error", err.Error())
+				if errors.Is(err, context.Canceled) {
+					return err
+				}
 			}
 		}
 

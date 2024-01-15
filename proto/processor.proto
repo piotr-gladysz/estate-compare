@@ -1,0 +1,18 @@
+syntax = "proto3";
+package api;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "buf/validate/validate.proto";
+
+message ProcessingStatus {
+  bool isRunning = 1;
+  google.protobuf.Timestamp lastRun = 2;
+  google.protobuf.Timestamp nextRun = 3;
+}
+
+service ProcessorService {
+  rpc StartProcessing(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc StopProcessing(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc GetProcessingStatus(google.protobuf.Empty) returns (ProcessingStatus);
+}
