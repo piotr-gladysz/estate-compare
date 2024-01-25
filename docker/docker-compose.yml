@@ -6,7 +6,6 @@ services:
     restart: always
     ports:
       - "11080:11080"
-
   mongo:
     image: mongo:7
     container_name: mongo
