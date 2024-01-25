@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "github.com/piotr-gladysz/estate-compare/pkg/hack/pprof"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/admin"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/crawler"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/db"
@@ -25,7 +26,6 @@ func init() {
 }
 
 func main() {
-
 	conf := crawler.GetConfig()
 	ctx := context.Background()
 

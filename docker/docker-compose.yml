@@ -1,5 +1,12 @@
 version: "3.7"
 services:
+  worker:
+    image: estate-compare/worker:latest
+    container_name: worker
+    restart: always
+    ports:
+      - "11080:11080"
+
   mongo:
     image: mongo:7
     container_name: mongo
