@@ -1,14 +1,9 @@
 version: "3.7"
+name: estate-compare-dev
 services:
-  worker:
-    image: estate-compare/worker:latest
-    container_name: worker
-    restart: always
-    ports:
-      - "11080:11080"
   mongo:
     image: mongo:7
-    container_name: mongo
+    container_name: mongo-dev
     restart: always
     ports:
       - "27017:27017"
@@ -18,6 +13,6 @@ services:
   selenium:
     image: selenium/standalone-firefox:120.0
     restart: always
-    container_name: selenium
+    container_name: selenium-dev
     ports:
       - "4444:4444"

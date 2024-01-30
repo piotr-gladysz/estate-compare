@@ -23,7 +23,7 @@ func GetSelenium() (selenium.WebDriver, error) {
 	wd, err := selenium.NewRemote(caps, config.SeleniumUrl)
 
 	if err != nil {
-		slog.Error("failed to create selenium", err.Error())
+		slog.Error("failed to create selenium", "err", err.Error())
 	}
 
 	return wd, err

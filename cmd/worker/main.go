@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	_ "github.com/piotr-gladysz/estate-compare/pkg/hack/pprof"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/admin"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/crawler"
@@ -27,6 +28,9 @@ func init() {
 
 func main() {
 	conf := crawler.GetConfig()
+
+	fmt.Printf("%+v\n", conf)
+
 	ctx := context.Background()
 
 	d, err := db.NewDB(ctx, conf.DatabaseUrl, conf.DatabaseName)

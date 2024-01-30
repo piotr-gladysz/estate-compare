@@ -31,4 +31,5 @@ docker/Dockerfile.cli
 LICENSE
 README.md
 
-**/.idea
+.idea
+data

@@ -29,12 +29,12 @@ func NewDB(ctx context.Context, dbUrl, dbName string) (DB, error) {
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(dbUrl))
 	if err != nil {
-		slog.Error("Failed to connect to database", err.Error())
+		slog.Error("Failed to connect to database", "error", err.Error())
 		return nil, err
 	}
 
 	if err := client.Ping(ctx, nil); err != nil {
-		slog.Error("Failed to connect to database", err.Error())
+		slog.Error("Failed to connect to database", "error", err.Error())
 		return nil, err
 	}
 
