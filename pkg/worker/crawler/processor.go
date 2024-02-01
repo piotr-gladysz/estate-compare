@@ -38,6 +38,7 @@ func NewSitesProcessor(ctx context.Context, registry *FactoryRegistry, watchUrlR
 	}
 }
 
+// Run starts the processor with periodic jobs
 func (s *SitesProcessor) Run() error {
 
 	sched, err := gocron.NewScheduler()
@@ -78,6 +79,7 @@ func (s *SitesProcessor) Run() error {
 	}
 }
 
+// Process runs the processor once
 func (s *SitesProcessor) Process() error {
 
 	s.procMux.Lock()
@@ -114,7 +116,7 @@ func (s *SitesProcessor) Process() error {
 	}
 
 	for _, list := range lists {
-		_ = s.ProcessSiteLink(ctx, wd, list.Url)
+		_ = s.ProcessSiteList(ctx, wd, list.Url)
 	}
 
 	sites, err := s.watchUrlRepo.FindBy(ctx, primitive.M{"isList": false, "disabled": false})
@@ -129,7 +131,7 @@ func (s *SitesProcessor) Process() error {
 	return nil
 }
 
-func (s *SitesProcessor) ProcessSiteLink(ctx context.Context, wd selenium.WebDriver, url string) error {
+func (s *SitesProcessor) ProcessSiteList(ctx context.Context, wd selenium.WebDriver, url string) error {
 	_, crawler := s.registry.GetCrawler(url)
 	if crawler == nil {
 		err := errors.New("crawler not found")

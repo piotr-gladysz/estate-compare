@@ -1,7 +1,9 @@
 package crawler
 
-import "testing"
+import (
+	"testing"
+)
 
-func TestNewSitesProcessor(t *testing.T) {
-	t.Skip("TODO")
+func TestRunProcessing(t *testing.T) {
+
 }
