@@ -1,7 +1,6 @@
-package testutils
+package crawler
 
 import (
-	"github.com/piotr-gladysz/estate-compare/pkg/worker/crawler"
 	"github.com/tebeka/selenium"
 )
 
@@ -15,7 +14,7 @@ func NewFactoryMock() *FactoryMock {
 
 type PageCrawlerMock struct {
 	Callback    func(this *PageCrawlerMock, method string, args ...any)
-	ReturnOffer *crawler.Offer
+	ReturnOffer *Offer
 	ReturnError error
 }
 
@@ -30,15 +29,15 @@ type ListCrawlerMock struct {
 type FactoryMock struct {
 	Callback func(this *FactoryMock, method string, args ...any)
 
-	ReturnPageCrawler     crawler.PageCrawler
-	ReturnPageListCrawler crawler.ListCrawler
-	ReturnMatchType       crawler.MatchType
+	ReturnPageCrawler     *PageCrawlerMock
+	ReturnPageListCrawler *ListCrawlerMock
+	ReturnMatchType       MatchType
 }
 
 // PageCrawlerMock implementation
 // -----------------------------
 
-func (p *PageCrawlerMock) CrawlOffer(driver selenium.WebDriver, s string) (*crawler.Offer, error) {
+func (p *PageCrawlerMock) CrawlOffer(driver selenium.WebDriver, s string) (*Offer, error) {
 	if p.Callback != nil {
 		p.Callback(p, "CrawlOffer", driver, s)
 	}
@@ -68,7 +67,7 @@ func (l *ListCrawlerMock) NextPage(driver selenium.WebDriver, s string) (string,
 // FactoryMock implementation
 // -----------------------------
 
-func (f FactoryMock) NewPageCrawler() crawler.PageCrawler {
+func (f FactoryMock) NewPageCrawler() PageCrawler {
 	if f.Callback != nil {
 		f.Callback(&f, "NewPageCrawler")
 	}
@@ -76,7 +75,7 @@ func (f FactoryMock) NewPageCrawler() crawler.PageCrawler {
 	return f.ReturnPageCrawler
 }
 
-func (f FactoryMock) NewListCrawler() crawler.ListCrawler {
+func (f FactoryMock) NewListCrawler() ListCrawler {
 	if f.Callback != nil {
 		f.Callback(&f, "NewListCrawler")
 	}
@@ -84,7 +83,7 @@ func (f FactoryMock) NewListCrawler() crawler.ListCrawler {
 	return f.ReturnPageListCrawler
 }
 
-func (f FactoryMock) MatchUrl(s string) crawler.MatchType {
+func (f FactoryMock) MatchUrl(s string) MatchType {
 	if f.Callback != nil {
 		f.Callback(&f, "MatchUrl", s)
 	}

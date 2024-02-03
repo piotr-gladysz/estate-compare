@@ -10,51 +10,51 @@ var _ db.OfferRepository = (*OfferRepositoryMock)(nil)
 
 // OfferRepositoryMock is a mock implementation of db.OfferRepository
 type OfferRepositoryMock struct {
-	Callback     func(method string, args ...any)
+	Callback     func(this *OfferRepositoryMock, method string, args ...any)
 	ReturnSingle *db.Offer
 	ReturnMany   []*db.Offer
 	ReturnError  error
 }
 
-func (t *OfferRepositoryMock) Insert(ctx context.Context, offer *db.Offer) error {
-	if t.Callback != nil {
-		t.Callback("Insert", offer)
+func (m *OfferRepositoryMock) Insert(ctx context.Context, offer *db.Offer) error {
+	if m.Callback != nil {
+		m.Callback(m, "Insert", offer)
 	}
 
-	return t.ReturnError
+	return m.ReturnError
 }
 
-func (t *OfferRepositoryMock) Update(ctx context.Context, offer *db.Offer) error {
-	if t.Callback != nil {
-		t.Callback("Update", offer)
+func (m *OfferRepositoryMock) Update(ctx context.Context, offer *db.Offer) error {
+	if m.Callback != nil {
+		m.Callback(m, "Update", offer)
 	}
-	return t.ReturnError
+	return m.ReturnError
 }
 
-func (t *OfferRepositoryMock) Delete(ctx context.Context, id primitive.ObjectID) error {
-	if t.Callback != nil {
-		t.Callback("Delete", id)
+func (m *OfferRepositoryMock) Delete(ctx context.Context, id primitive.ObjectID) error {
+	if m.Callback != nil {
+		m.Callback(m, "Delete", id)
 	}
-	return t.ReturnError
+	return m.ReturnError
 }
 
-func (t *OfferRepositoryMock) FindById(ctx context.Context, id primitive.ObjectID) (*db.Offer, error) {
-	if t.Callback != nil {
-		t.Callback("FindById", id)
+func (m *OfferRepositoryMock) FindById(ctx context.Context, id primitive.ObjectID) (*db.Offer, error) {
+	if m.Callback != nil {
+		m.Callback(m, "FindById", id)
 	}
-	return t.ReturnSingle, t.ReturnError
+	return m.ReturnSingle, m.ReturnError
 }
 
-func (t *OfferRepositoryMock) FindBy(ctx context.Context, by primitive.M) ([]*db.Offer, error) {
-	if t.Callback != nil {
-		t.Callback("FindBy", by)
+func (m *OfferRepositoryMock) FindBy(ctx context.Context, by primitive.M) ([]*db.Offer, error) {
+	if m.Callback != nil {
+		m.Callback(m, "FindBy", by)
 	}
-	return t.ReturnMany, t.ReturnError
+	return m.ReturnMany, m.ReturnError
 }
 
-func (t *OfferRepositoryMock) FindAll(ctx context.Context, limit int64, skip int64) ([]*db.Offer, error) {
-	if t.Callback != nil {
-		t.Callback("FindAll", limit, skip)
+func (m *OfferRepositoryMock) FindAll(ctx context.Context, limit int64, skip int64) ([]*db.Offer, error) {
+	if m.Callback != nil {
+		m.Callback(m, "FindAll", limit, skip)
 	}
-	return t.ReturnMany, t.ReturnError
+	return m.ReturnMany, m.ReturnError
 }

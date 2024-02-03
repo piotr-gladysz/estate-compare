@@ -10,6 +10,8 @@ import (
 	"net"
 )
 
+var ServerNotRunningError = errors.New("server not running")
+
 type Server struct {
 	watchUrlRepo db.WatchUrlRepository
 	offerRepo    db.OfferRepository
@@ -53,9 +55,9 @@ func (s *Server) Run() error {
 
 func (s *Server) Close() error {
 	if s.server == nil {
-		err := errors.New("server not running")
-		slog.Error(err.Error())
-		return err
+
+		slog.Error(ServerNotRunningError.Error())
+		return ServerNotRunningError
 	}
 
 	s.server.GracefulStop()

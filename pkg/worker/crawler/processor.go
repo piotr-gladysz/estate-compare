@@ -16,6 +16,8 @@ import (
 	"time"
 )
 
+var CrawlerNotFoundError = errors.New("crawler not found")
+
 type SitesProcessor struct {
 	registry     *FactoryRegistry
 	watchUrlRepo db.WatchUrlRepository
@@ -134,9 +136,8 @@ func (s *SitesProcessor) Process() error {
 func (s *SitesProcessor) ProcessSiteList(ctx context.Context, wd selenium.WebDriver, url string) error {
 	_, crawler := s.registry.GetCrawler(url)
 	if crawler == nil {
-		err := errors.New("crawler not found")
-		slog.Warn("failed to get crawler", "url", url, "error", err.Error())
-		return err
+		slog.Warn("failed to get crawler", "url", url, "error", CrawlerNotFoundError.Error())
+		return CrawlerNotFoundError
 	}
 
 	for i := 0; i < config.CrawlerPagesCount; i++ {
@@ -172,9 +173,8 @@ func (s *SitesProcessor) ProcessSiteList(ctx context.Context, wd selenium.WebDri
 func (s *SitesProcessor) ProcessSite(ctx context.Context, wd selenium.WebDriver, url string) error {
 	crawler, _ := s.registry.GetCrawler(url)
 	if crawler == nil {
-		err := errors.New("crawler not found")
-		slog.Warn("failed to get crawler", "url", url, "error", err.Error())
-		return err
+		slog.Warn("failed to get crawler", "url", url, "error", CrawlerNotFoundError.Error())
+		return CrawlerNotFoundError
 	}
 
 	offer, err := crawler.CrawlOffer(wd, url)
@@ -196,23 +196,24 @@ func (s *SitesProcessor) ProcessSite(ctx context.Context, wd selenium.WebDriver,
 			slog.Warn("failed to insert offer", "url", url, "error", err.Error())
 			return err
 		}
-	} else {
-		existingOffer := existing[0]
-		history := existingOffer.History[len(existingOffer.History)-1]
-		if history.Price == offer.Price {
-			return nil
-		}
+		return nil
+	}
 
-		existingOffer.Updated = primitive.NewDateTimeFromTime(offer.UpdateTime)
-		existingOffer.History = append(existingOffer.History, &db.OfferHistory{
-			Updated: primitive.NewDateTimeFromTime(offer.UpdateTime),
-			Price:   offer.Price,
-		})
-		err = s.offerRepo.Update(ctx, existingOffer)
-		if err != nil {
-			slog.Warn("failed to update offer", "url", url, "error", err.Error())
-			return err
-		}
+	existingOffer := existing[0]
+	history := existingOffer.History[len(existingOffer.History)-1]
+	if history.Price == offer.Price {
+		return nil
+	}
+
+	existingOffer.Updated = primitive.NewDateTimeFromTime(offer.UpdateTime)
+	existingOffer.History = append(existingOffer.History, &db.OfferHistory{
+		Updated: primitive.NewDateTimeFromTime(offer.UpdateTime),
+		Price:   offer.Price,
+	})
+	err = s.offerRepo.Update(ctx, existingOffer)
+	if err != nil {
+		slog.Warn("failed to update offer", "url", url, "error", err.Error())
+		return err
 	}
 
 	return nil

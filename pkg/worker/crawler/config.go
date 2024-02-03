@@ -9,7 +9,11 @@ import (
 
 // TODO: move to separate package
 
-var config *Config
+var (
+	ConfigNotLoadedError = errors.New("config not loaded")
+
+	config *Config
+)
 
 func LoadConfig() error {
 	viper.SetConfigFile(".env")
@@ -29,9 +33,8 @@ func LoadConfig() error {
 
 func GetConfig() Config {
 	if config == nil {
-		err := errors.New("config not loaded")
-		slog.Error(err.Error())
-		panic(err)
+		slog.Error(ConfigNotLoadedError.Error())
+		panic(ConfigNotLoadedError)
 	}
 	return *config
 }
