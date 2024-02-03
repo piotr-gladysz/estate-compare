@@ -1,0 +1,15 @@
+version: "3.7"
+name: estate-compare-test
+services:
+  mongo:
+    image: mongo:7
+    container_name: mongo-test
+    restart: always
+    ports:
+      - "27017:27017"
+  selenium:
+    image: selenium/standalone-firefox:120.0
+    restart: always
+    container_name: selenium-test
+    ports:
+      - "4444:4444"

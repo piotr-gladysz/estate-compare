@@ -1,0 +1,32 @@
+version: "3.7"
+name: estate-compare
+services:
+  worker:
+    image: estate-compare/worker
+    container_name: worker
+    restart: always
+    environment:
+        - DATABASE_URL=mongodb://mongo:27017
+        - DATABASE_NAME=estate-compare
+        - CRAWLER_PERIOD=6h
+        - CRAWLER_PAGES_COUNT=3
+        - SELENIUM_URL=http://selenium:4444/wd/hub
+        - SERVER_ENABLED=true
+        - SERVER_PORT=11080
+        - SERVER_IP=0.0.0.0
+    ports:
+      - "11080:11080"
+    depends_on:
+      - mongo
+      - selenium
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    restart: always
+    volumes:
+      - ./data/mongo/db:/data/db
+      - ./data/mongo/config:/data/configdb
+  selenium:
+    image: selenium/standalone-firefox:120.0
+    restart: always
+    container_name: selenium

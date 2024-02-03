@@ -1,0 +1,54 @@
+syntax = "proto3";
+package api;
+
+import "google/protobuf/timestamp.proto";
+import "buf/validate/validate.proto";
+
+message GetOfferRequest {
+  string id = 1 [(buf.validate.field).string.min_len = 1];
+}
+
+message GetOffersRequest {
+  int32 page = 1 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 2 [(buf.validate.field).int32.gte = 1];
+}
+
+message OfferResponse {
+  string id = 1;
+  string siteId = 2;
+  string site = 3;
+  int64 created = 4;
+  int64 updated = 5;
+
+  string name = 6;
+  string url = 7;
+  float area = 8;
+  int32 rooms = 9;
+  int32 floor = 10;
+  int32 buildingFloors = 11;
+  int32 year = 12;
+  string heating = 13;
+  string market = 14;
+  string window = 15;
+  bool elevator = 16;
+  bool balcony = 17;
+  repeated string media = 18;
+  repeated OfferHistory history = 19;
+}
+
+message OfferHistory {
+  int64 updated = 1;
+  int32 price = 2;
+}
+
+
+message OfferListResponse {
+  repeated OfferResponse offers = 1;
+  int32 total = 2 [(buf.validate.field).int32.gte = 0];
+}
+
+service OfferService {
+  rpc GetOffer(GetOfferRequest) returns (OfferResponse) { }
+  rpc GetOffers(GetOffersRequest) returns (OfferListResponse) { }
+
+}
