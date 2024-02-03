@@ -3,6 +3,7 @@ package crawler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/db"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/testutils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -257,6 +258,109 @@ func TestSitesProcessor_ProcessSite(t *testing.T) {
 
 	if len(dbOffer.History) != 2 {
 		t.Error("History should have 2 elements")
+	}
+}
+
+func TestSitesProcessor_ProcessSiteList(t *testing.T) {
+	config = getDefaultConfig()
+	processor, watchUrlRepo, _ := MockProcessor()
+
+	factory := NewFactoryMock()
+	processor.registry.Register(factory)
+
+	getUrlsCalled := 0
+	nextPageCalled := 0
+
+	var dbOffer *db.Offer
+
+	factory.ReturnPageListCrawler.Callback = func(this *ListCrawlerMock, method string, args ...any) {
+		page := fmt.Sprintf("nextPage:%d", nextPageCalled)
+
+		switch method {
+		case "GetUrls":
+			getUrlsCalled++
+		case "NextPage":
+			calledPage := args[1].(string)
+			if calledPage != page {
+				t.Error("NextPage should be called with correct page")
+			}
+			nextPageCalled++
+			page = fmt.Sprintf("nextPage:%d", nextPageCalled)
+			this.ReturnNextPage = page
+		}
+	}
+
+	insertCalled := 0
+
+	watchUrlRepo.Callback = func(this *testutils.WatchUrlRepositoryMock, method string, args ...any) {
+		switch method {
+		case "InsertIfNotExists":
+			insertCalled++
+		}
+	}
+
+	// Test 1 - GetUrls error
+
+	factory.ReturnMatchType = CrawlerNotMatch
+	url := fmt.Sprintf("nextPage:%d", nextPageCalled)
+
+	err := processor.ProcessSiteList(context.TODO(), nil, url)
+
+	if err == nil {
+		t.Error("Error should not be nil")
+	} else if !errors.Is(err, CrawlerNotFoundError) {
+		t.Error("Error should be getUrlsError")
+	}
+
+	if getUrlsCalled != 0 {
+		t.Error("GetUrls should be called")
+	}
+
+	if nextPageCalled != 0 {
+		t.Error("NextPage should not be called")
+	}
+
+	if insertCalled != 0 {
+		t.Error("InsertIfNotExists should not be called")
+	}
+
+	if dbOffer != nil {
+		t.Error("Offer should be nil")
+	}
+
+	// Test 2 - Crawl list of urls
+
+	factory.ReturnMatchType = CrawlerMatchList
+	factory.ReturnPageListCrawler.ReturnError = nil
+	factory.ReturnPageListCrawler.ReturnUrls = []string{"url1", "url2"}
+
+	getUrlsCalled = 0
+	nextPageCalled = 0
+
+	err = processor.ProcessSiteList(context.TODO(), nil, url)
+
+	if err != nil {
+		t.Error("Error should be nil")
+	}
+
+	if getUrlsCalled == 0 {
+		t.Error("GetUrls should be called")
+	}
+
+	if nextPageCalled == 0 {
+		t.Error("NextPage should be called")
+	}
+
+	if insertCalled == 0 {
+		t.Error("InsertIfNotExists should be called")
+	}
+
+	if getUrlsCalled != nextPageCalled {
+		t.Error("GetUrls should be called the same number of times as nextPage")
+	}
+
+	if insertCalled != len(factory.ReturnPageListCrawler.ReturnUrls)*getUrlsCalled {
+		t.Error("InsertIfNotExists should be called the same number of times as GetUrls")
 	}
 
 }
