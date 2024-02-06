@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	_ "github.com/piotr-gladysz/estate-compare/pkg/hack/pprof"
+	_ "github.com/piotr-gladysz/estate-compare/pkg/util/hack/pprof"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/admin"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/crawler"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/db"

@@ -8,9 +8,11 @@ import (
 )
 
 const (
-	alertsCollectionName    = "alerts"
-	offersCollectionName    = "offers"
-	watchUrlsCollectionName = "watch_urls"
+	sentNotificationsCollectionName = "sent_notifications"
+	notificationsCollectionName     = "notifications"
+	offersCollectionName            = "offers"
+	watchUrlsCollectionName         = "watch_urls"
+	conditionsCollectionName        = "conditions"
 )
 
 type dB struct {
@@ -19,7 +21,7 @@ type dB struct {
 }
 
 type DB interface {
-	GetAlertRepository() AlertRepository
+	GetAlertRepository() NotificationRepository
 	GetOfferRepository() OfferRepository
 	GetWatchUrlRepository() WatchUrlRepository
 	Close(ctx context.Context) error
@@ -48,7 +50,7 @@ func (d *dB) Close(ctx context.Context) error {
 	return d.db.Disconnect(ctx)
 }
 
-func (d *dB) GetAlertRepository() AlertRepository {
+func (d *dB) GetAlertRepository() NotificationRepository {
 	// TODO: implement
 	return nil
 }
