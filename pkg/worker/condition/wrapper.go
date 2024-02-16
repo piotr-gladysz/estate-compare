@@ -59,3 +59,7 @@ func NewWrapper(ctx context.Context, reader io.Reader) (*Wrapper, error) {
 		checkFunc: checkFunc,
 	}, nil
 }
+
+func (w *Wrapper) Close(ctx context.Context) error {
+	return w.module.Close(ctx)
+}

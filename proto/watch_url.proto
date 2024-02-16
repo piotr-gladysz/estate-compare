@@ -29,6 +29,7 @@ message UrlResponse {
 }
 message UrlListResponse {
     repeated UrlResponse urls = 1;
+    int32 total = 2;
 }
 
 service WatchUrlService {
