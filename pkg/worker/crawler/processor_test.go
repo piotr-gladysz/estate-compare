@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/piotr-gladysz/estate-compare/pkg/worker/db"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/db/model"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/testutils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"testing"
@@ -132,7 +132,7 @@ func TestSitesProcessor_ProcessSite(t *testing.T) {
 	insertCalled := false
 	updateCalled := false
 
-	var dbOffer *db.Offer
+	var dbOffer *model.Offer
 
 	factory.Callback = func(this *FactoryMock, method string, args ...any) {
 		switch method {
@@ -154,10 +154,10 @@ func TestSitesProcessor_ProcessSite(t *testing.T) {
 			findByCalled = true
 		case "Insert":
 			insertCalled = true
-			dbOffer = args[0].(*db.Offer)
+			dbOffer = args[0].(*model.Offer)
 		case "Update":
 			updateCalled = true
-			dbOffer = args[0].(*db.Offer)
+			dbOffer = args[0].(*model.Offer)
 		}
 	}
 
@@ -190,7 +190,7 @@ func TestSitesProcessor_ProcessSite(t *testing.T) {
 	factory.ReturnMatchType = CrawlerMatchPage
 	factory.ReturnPageCrawler.ReturnOffer = testOffer
 
-	offerRepo.ReturnMany = make([]*db.Offer, 0)
+	offerRepo.ReturnMany = make([]*model.Offer, 0)
 
 	err = processor.ProcessSite(context.TODO(), nil, "test")
 
@@ -232,8 +232,8 @@ func TestSitesProcessor_ProcessSite(t *testing.T) {
 	factory.ReturnMatchType = CrawlerMatchPage
 	factory.ReturnPageCrawler.ReturnOffer = testOffer
 
-	offerRepo.ReturnMany = []*db.Offer{{
-		History: []*db.OfferHistory{{
+	offerRepo.ReturnMany = []*model.Offer{{
+		History: []*model.OfferHistory{{
 			Price: testOffer.Price + 10,
 		}},
 	}}
@@ -271,7 +271,7 @@ func TestSitesProcessor_ProcessSiteList(t *testing.T) {
 	getUrlsCalled := 0
 	nextPageCalled := 0
 
-	var dbOffer *db.Offer
+	var dbOffer *model.Offer
 
 	factory.ReturnPageListCrawler.Callback = func(this *ListCrawlerMock, method string, args ...any) {
 		page := fmt.Sprintf("nextPage:%d", nextPageCalled)

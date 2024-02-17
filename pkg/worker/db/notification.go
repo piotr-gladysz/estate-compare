@@ -2,28 +2,22 @@ package db
 
 import (
 	"context"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/db/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Notification struct {
-	ID primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-
-	ConditionId primitive.ObjectID `json:"conditionId" bson:"conditionId"`
-	Config      map[string]any     `json:"config" bson:"config"`
-}
-
 type NotificationRepository interface {
-	Insert(ctx context.Context, notification *Notification) error
+	Insert(ctx context.Context, notification *model.Notification) error
 	Delete(ctx context.Context, id primitive.ObjectID) error
-	FindBy(ctx context.Context, by primitive.M) ([]*Notification, error)
+	FindBy(ctx context.Context, by primitive.M) ([]*model.Notification, error)
 }
 
 type notificationRepository struct {
 	collection *mongo.Collection
 }
 
-func (r *notificationRepository) Insert(ctx context.Context, notification *Notification) error {
+func (r *notificationRepository) Insert(ctx context.Context, notification *model.Notification) error {
 	res, err := r.collection.InsertOne(ctx, notification)
 	notification.ID = res.InsertedID.(primitive.ObjectID)
 	return err
@@ -34,8 +28,8 @@ func (r *notificationRepository) Delete(ctx context.Context, id primitive.Object
 	return err
 }
 
-func (r *notificationRepository) FindBy(ctx context.Context, by primitive.M) ([]*Notification, error) {
-	var notifications []*Notification
+func (r *notificationRepository) FindBy(ctx context.Context, by primitive.M) ([]*model.Notification, error) {
+	var notifications []*model.Notification
 	cursor, err := r.collection.Find(ctx, by)
 	if err != nil {
 		return nil, err

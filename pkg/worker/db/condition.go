@@ -2,24 +2,16 @@ package db
 
 import (
 	"context"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/db/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type Condition struct {
-	ID primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-
-	Updated primitive.DateTime `json:"updated" bson:"updated"`
-	Created primitive.DateTime `json:"created" bson:"created"`
-	Name    string             `json:"name" bson:"name"`
-	Wasm    []byte             `json:"wasm" bson:"wasm"`
-}
-
 type ConditionRepository interface {
-	Insert(ctx context.Context, condition *Condition) error
+	Insert(ctx context.Context, condition *model.Condition) error
 	Delete(ctx context.Context, id primitive.ObjectID) error
-	FindBy(ctx context.Context, by primitive.M) ([]*Condition, error)
+	FindBy(ctx context.Context, by primitive.M) ([]*model.Condition, error)
 	GetWasm(ctx context.Context, id primitive.ObjectID) ([]byte, error)
 }
 
@@ -27,7 +19,7 @@ type conditionRepository struct {
 	collection *mongo.Collection
 }
 
-func (r *conditionRepository) Insert(ctx context.Context, condition *Condition) error {
+func (r *conditionRepository) Insert(ctx context.Context, condition *model.Condition) error {
 	res, err := r.collection.InsertOne(ctx, condition)
 	condition.ID = res.InsertedID.(primitive.ObjectID)
 	return err
@@ -38,8 +30,8 @@ func (r *conditionRepository) Delete(ctx context.Context, id primitive.ObjectID)
 	return err
 }
 
-func (r *conditionRepository) FindBy(ctx context.Context, by primitive.M) ([]*Condition, error) {
-	var conditions []*Condition
+func (r *conditionRepository) FindBy(ctx context.Context, by primitive.M) ([]*model.Condition, error) {
+	var conditions []*model.Condition
 
 	opts := options.Find().SetProjection(primitive.D{{"wasm", 0}})
 
@@ -53,7 +45,7 @@ func (r *conditionRepository) FindBy(ctx context.Context, by primitive.M) ([]*Co
 }
 
 func (r *conditionRepository) GetWasm(ctx context.Context, id primitive.ObjectID) ([]byte, error) {
-	var condition Condition
+	var condition model.Condition
 
 	opts := options.FindOne().SetProjection(primitive.D{{"wasm", 1}})
 

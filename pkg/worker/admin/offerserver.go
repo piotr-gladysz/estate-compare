@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/piotr-gladysz/estate-compare/pkg/api"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/db"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/db/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log/slog"
 )
@@ -56,7 +57,7 @@ func (o *OfferServer) GetOffers(ctx context.Context, request *api.GetOffersReque
 
 }
 
-func (o *OfferServer) offerToResponse(offer *db.Offer, withHistory bool) *api.OfferResponse {
+func (o *OfferServer) offerToResponse(offer *model.Offer, withHistory bool) *api.OfferResponse {
 	ret := &api.OfferResponse{
 		Id:             offer.ID.Hex(),
 		SiteId:         offer.SiteId,

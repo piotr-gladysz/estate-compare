@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/db"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/db/model"
 	"github.com/tebeka/selenium"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log/slog"
@@ -149,7 +150,7 @@ func (s *SitesProcessor) ProcessSiteList(ctx context.Context, wd selenium.WebDri
 		}
 
 		for _, link := range links {
-			watchUrl := &db.WatchUrl{
+			watchUrl := &model.WatchUrl{
 				Url: link,
 			}
 			err = s.watchUrlRepo.InsertIfNotExists(ctx, watchUrl)
@@ -206,7 +207,7 @@ func (s *SitesProcessor) ProcessSite(ctx context.Context, wd selenium.WebDriver,
 	}
 
 	existingOffer.Updated = primitive.NewDateTimeFromTime(offer.UpdateTime)
-	existingOffer.History = append(existingOffer.History, &db.OfferHistory{
+	existingOffer.History = append(existingOffer.History, &model.OfferHistory{
 		Updated: primitive.NewDateTimeFromTime(offer.UpdateTime),
 		Price:   offer.Price,
 	})
@@ -219,8 +220,8 @@ func (s *SitesProcessor) ProcessSite(ctx context.Context, wd selenium.WebDriver,
 	return nil
 }
 
-func (s *SitesProcessor) MapOfferToDB(offer *Offer, url string) *db.Offer {
-	return &db.Offer{
+func (s *SitesProcessor) MapOfferToDB(offer *Offer, url string) *model.Offer {
+	return &model.Offer{
 		SiteId:         offer.SiteId,
 		Site:           offer.Site,
 		Updated:        primitive.NewDateTimeFromTime(offer.UpdateTime),
@@ -237,7 +238,7 @@ func (s *SitesProcessor) MapOfferToDB(offer *Offer, url string) *db.Offer {
 		Elevator:       offer.Elevator,
 		Balcony:        offer.Balcony,
 		Media:          offer.Media,
-		History: []*db.OfferHistory{
+		History: []*model.OfferHistory{
 			{
 				Updated: primitive.NewDateTimeFromTime(offer.UpdateTime),
 				Price:   offer.Price,

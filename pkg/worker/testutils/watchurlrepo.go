@@ -2,18 +2,18 @@ package testutils
 
 import (
 	"context"
-	"github.com/piotr-gladysz/estate-compare/pkg/worker/db"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/db/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type WatchUrlRepositoryMock struct {
 	Callback     func(this *WatchUrlRepositoryMock, method string, args ...any)
-	ReturnSingle *db.WatchUrl
-	ReturnMany   []*db.WatchUrl
+	ReturnSingle *model.WatchUrl
+	ReturnMany   []*model.WatchUrl
 	ReturnError  error
 }
 
-func (w *WatchUrlRepositoryMock) Insert(ctx context.Context, watchUrl *db.WatchUrl) error {
+func (w *WatchUrlRepositoryMock) Insert(ctx context.Context, watchUrl *model.WatchUrl) error {
 	if w.Callback != nil {
 		w.Callback(w, "Insert", watchUrl)
 	}
@@ -21,7 +21,7 @@ func (w *WatchUrlRepositoryMock) Insert(ctx context.Context, watchUrl *db.WatchU
 	return w.ReturnError
 }
 
-func (w *WatchUrlRepositoryMock) InsertIfNotExists(ctx context.Context, watchUrl *db.WatchUrl) error {
+func (w *WatchUrlRepositoryMock) InsertIfNotExists(ctx context.Context, watchUrl *model.WatchUrl) error {
 	if w.Callback != nil {
 		w.Callback(w, "InsertIfNotExists", watchUrl)
 	}
@@ -29,7 +29,7 @@ func (w *WatchUrlRepositoryMock) InsertIfNotExists(ctx context.Context, watchUrl
 	return w.ReturnError
 }
 
-func (w *WatchUrlRepositoryMock) Update(ctx context.Context, watchUrl *db.WatchUrl) error {
+func (w *WatchUrlRepositoryMock) Update(ctx context.Context, watchUrl *model.WatchUrl) error {
 	if w.Callback != nil {
 		w.Callback(w, "Update", watchUrl)
 	}
@@ -45,7 +45,7 @@ func (w *WatchUrlRepositoryMock) Delete(ctx context.Context, id primitive.Object
 	return w.ReturnError
 }
 
-func (w *WatchUrlRepositoryMock) FindById(ctx context.Context, id primitive.ObjectID) (*db.WatchUrl, error) {
+func (w *WatchUrlRepositoryMock) FindById(ctx context.Context, id primitive.ObjectID) (*model.WatchUrl, error) {
 	if w.Callback != nil {
 		w.Callback(w, "FindById", id)
 	}
@@ -53,7 +53,7 @@ func (w *WatchUrlRepositoryMock) FindById(ctx context.Context, id primitive.Obje
 	return w.ReturnSingle, w.ReturnError
 }
 
-func (w *WatchUrlRepositoryMock) FindBy(ctx context.Context, by primitive.M) ([]*db.WatchUrl, error) {
+func (w *WatchUrlRepositoryMock) FindBy(ctx context.Context, by primitive.M) ([]*model.WatchUrl, error) {
 	if w.Callback != nil {
 		w.Callback(w, "FindBy", by)
 	}
@@ -61,7 +61,7 @@ func (w *WatchUrlRepositoryMock) FindBy(ctx context.Context, by primitive.M) ([]
 	return w.ReturnMany, w.ReturnError
 }
 
-func (w *WatchUrlRepositoryMock) FindAll(ctx context.Context, limit int64, skip int64) ([]*db.WatchUrl, error) {
+func (w *WatchUrlRepositoryMock) FindAll(ctx context.Context, limit int64, skip int64) ([]*model.WatchUrl, error) {
 	if w.Callback != nil {
 		w.Callback(w, "FindAll", limit, skip)
 	}

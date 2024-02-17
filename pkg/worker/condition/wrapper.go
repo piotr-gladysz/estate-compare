@@ -2,7 +2,8 @@ package condition
 
 import (
 	"context"
-	"fmt"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/db/model"
+	"github.com/pkg/errors"
 	"github.com/tetratelabs/wazero"
 	"github.com/tetratelabs/wazero/api"
 	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
@@ -10,7 +11,8 @@ import (
 	"log/slog"
 )
 
-var FunctionNotFoundError = fmt.Errorf("function not found")
+var FunctionNotFoundError = errors.New("function not found")
+var InvalidFunctionDefinitionError = errors.New("invalid function definition")
 
 type Wrapper struct {
 	module    api.Module
@@ -52,12 +54,55 @@ func NewWrapper(ctx context.Context, reader io.Reader) (*Wrapper, error) {
 		return nil, FunctionNotFoundError
 	}
 
+	funcParams := checkFunc.Definition().ParamTypes()
+
+	if len(funcParams) != 2 || funcParams[0] != api.ValueTypeI64 || funcParams[1] != api.ValueTypeI64 {
+		return nil, InvalidFunctionDefinitionError
+	}
+
+	funcResults := checkFunc.Definition().ResultTypes()
+
+	if len(funcResults) != 1 || funcResults[0] != api.ValueTypeI64 {
+		return nil, InvalidFunctionDefinitionError
+	}
+
 	//TODO: check parameters type of checkFunc
 
 	return &Wrapper{
 		module:    module,
 		checkFunc: checkFunc,
 	}, nil
+}
+
+func (w *Wrapper) CheckOffer(ctx context.Context, offer *model.Offer, config map[string]any) (*model.SentNotification, error) {
+	offerPtr, err := ObjToPointer(ctx, w.module, offer)
+	if err != nil {
+		return nil, err
+	}
+
+	configPtr, err := ObjToPointer(ctx, w.module, config)
+	if err != nil {
+		return nil, err
+	}
+
+	retPtr, err := w.checkFunc.Call(ctx, offerPtr, configPtr)
+	if err != nil {
+		return nil, err
+	}
+
+	if retPtr[0] == 0 {
+		return nil, nil
+	}
+
+	var ret model.SentNotification
+	err = PointerToObj(ctx, w.module, retPtr[0], &ret)
+
+	if err != nil {
+		return nil, err
+
+	}
+
+	return &ret, nil
 }
 
 func (w *Wrapper) Close(ctx context.Context) error {

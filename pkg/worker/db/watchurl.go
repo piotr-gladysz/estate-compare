@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/db/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -9,36 +10,27 @@ import (
 
 var _ WatchUrlRepository = (*watchUrlRepository)(nil)
 
-type WatchUrl struct {
-	ID       primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Url      string             `json:"url" bson:"url"`
-	IsList   bool               `json:"isList" bson:"isList"`
-	Created  primitive.DateTime `json:"created" bson:"created"`
-	Updated  primitive.DateTime `json:"updated" bson:"updated"`
-	Disabled bool               `json:"disabled" bson:"disabled"`
-}
-
 type WatchUrlRepository interface {
-	Insert(ctx context.Context, watchUrl *WatchUrl) error
-	InsertIfNotExists(ctx context.Context, watchUrl *WatchUrl) error
-	Update(ctx context.Context, watchUrl *WatchUrl) error
+	Insert(ctx context.Context, watchUrl *model.WatchUrl) error
+	InsertIfNotExists(ctx context.Context, watchUrl *model.WatchUrl) error
+	Update(ctx context.Context, watchUrl *model.WatchUrl) error
 	Delete(ctx context.Context, id primitive.ObjectID) error
-	FindById(ctx context.Context, id primitive.ObjectID) (*WatchUrl, error)
-	FindBy(ctx context.Context, by primitive.M) ([]*WatchUrl, error)
-	FindAll(ctx context.Context, limit int64, skip int64) ([]*WatchUrl, error)
+	FindById(ctx context.Context, id primitive.ObjectID) (*model.WatchUrl, error)
+	FindBy(ctx context.Context, by primitive.M) ([]*model.WatchUrl, error)
+	FindAll(ctx context.Context, limit int64, skip int64) ([]*model.WatchUrl, error)
 }
 
 type watchUrlRepository struct {
 	collection *mongo.Collection
 }
 
-func (r *watchUrlRepository) Insert(ctx context.Context, watchUrl *WatchUrl) error {
+func (r *watchUrlRepository) Insert(ctx context.Context, watchUrl *model.WatchUrl) error {
 	res, err := r.collection.InsertOne(ctx, watchUrl)
 	watchUrl.ID = res.InsertedID.(primitive.ObjectID)
 	return err
 }
 
-func (r *watchUrlRepository) InsertIfNotExists(ctx context.Context, watchUrl *WatchUrl) error {
+func (r *watchUrlRepository) InsertIfNotExists(ctx context.Context, watchUrl *model.WatchUrl) error {
 
 	ret := r.collection.FindOneAndUpdate(ctx,
 		primitive.M{"url": watchUrl.Url, "isList": watchUrl.IsList},
@@ -48,7 +40,7 @@ func (r *watchUrlRepository) InsertIfNotExists(ctx context.Context, watchUrl *Wa
 	return ret.Err()
 }
 
-func (r *watchUrlRepository) Update(ctx context.Context, watchUrl *WatchUrl) error {
+func (r *watchUrlRepository) Update(ctx context.Context, watchUrl *model.WatchUrl) error {
 	_, err := r.collection.UpdateOne(ctx, primitive.M{"_id": watchUrl.ID}, primitive.M{"$set": watchUrl})
 	return err
 }
@@ -58,15 +50,15 @@ func (r *watchUrlRepository) Delete(ctx context.Context, id primitive.ObjectID) 
 	return err
 }
 
-func (r *watchUrlRepository) FindById(ctx context.Context, id primitive.ObjectID) (*WatchUrl, error) {
-	var watchUrl WatchUrl
+func (r *watchUrlRepository) FindById(ctx context.Context, id primitive.ObjectID) (*model.WatchUrl, error) {
+	var watchUrl model.WatchUrl
 
 	err := r.collection.FindOne(ctx, primitive.M{"_id": id}).Decode(&watchUrl)
 	return &watchUrl, err
 }
 
-func (r *watchUrlRepository) FindBy(ctx context.Context, by primitive.M) ([]*WatchUrl, error) {
-	var watchUrls []*WatchUrl
+func (r *watchUrlRepository) FindBy(ctx context.Context, by primitive.M) ([]*model.WatchUrl, error) {
+	var watchUrls []*model.WatchUrl
 	cursor, err := r.collection.Find(ctx, by)
 
 	if err != nil {
@@ -77,8 +69,8 @@ func (r *watchUrlRepository) FindBy(ctx context.Context, by primitive.M) ([]*Wat
 	return watchUrls, err
 }
 
-func (r *watchUrlRepository) FindAll(ctx context.Context, limit int64, skip int64) ([]*WatchUrl, error) {
-	var watchUrls []*WatchUrl
+func (r *watchUrlRepository) FindAll(ctx context.Context, limit int64, skip int64) ([]*model.WatchUrl, error) {
+	var watchUrls []*model.WatchUrl
 
 	opts := options.Find().SetSkip(skip).SetLimit(limit)
 	cursor, err := r.collection.Find(ctx, primitive.M{}, opts)
