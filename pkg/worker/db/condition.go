@@ -8,10 +8,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var _ ConditionRepository = (*conditionRepository)(nil)
+
 type ConditionRepository interface {
 	Insert(ctx context.Context, condition *model.Condition) error
 	Delete(ctx context.Context, id primitive.ObjectID) error
 	FindBy(ctx context.Context, by primitive.M) ([]*model.Condition, error)
+	FindById(ctx context.Context, id primitive.ObjectID) (*model.Condition, error)
+	FindAll(ctx context.Context, limit int64, skip int64) ([]*model.Condition, int64, error)
 	GetWasm(ctx context.Context, id primitive.ObjectID) ([]byte, error)
 }
 
@@ -39,9 +43,42 @@ func (r *conditionRepository) FindBy(ctx context.Context, by primitive.M) ([]*mo
 	if err != nil {
 		return nil, err
 	}
+	defer cursor.Close(ctx)
+
+	return conditions, err
+}
+
+func (r *conditionRepository) FindById(ctx context.Context, id primitive.ObjectID) (*model.Condition, error) {
+	var condition model.Condition
+
+	err := r.collection.FindOne(ctx, primitive.M{"_id": id}).Decode(&condition)
+	return &condition, err
+
+}
+
+func (r *conditionRepository) FindAll(ctx context.Context, limit int64, skip int64) ([]*model.Condition, int64, error) {
+	var conditions []*model.Condition
+
+	opts := options.Find().SetProjection(primitive.D{{"wasm", 0}}).SetLimit(limit).SetSkip(skip)
+
+	cursor, err := r.collection.Find(ctx, primitive.M{}, opts)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer cursor.Close(ctx)
 
 	err = cursor.All(nil, &conditions)
-	return conditions, err
+	if err != nil {
+		return nil, 0, err
+	}
+
+	total, err := r.collection.CountDocuments(ctx, primitive.M{})
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return conditions, total, err
 }
 
 func (r *conditionRepository) GetWasm(ctx context.Context, id primitive.ObjectID) ([]byte, error) {

@@ -44,7 +44,7 @@ message OfferHistory {
 
 message OfferListResponse {
   repeated OfferResponse offers = 1;
-  int32 total = 2;
+  int64 total = 2;
 }
 
 service OfferService {

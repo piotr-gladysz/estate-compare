@@ -17,7 +17,7 @@ type WatchUrlRepository interface {
 	Delete(ctx context.Context, id primitive.ObjectID) error
 	FindById(ctx context.Context, id primitive.ObjectID) (*model.WatchUrl, error)
 	FindBy(ctx context.Context, by primitive.M) ([]*model.WatchUrl, error)
-	FindAll(ctx context.Context, limit int64, skip int64) ([]*model.WatchUrl, error)
+	FindAll(ctx context.Context, limit int64, skip int64) ([]*model.WatchUrl, int64, error)
 }
 
 type watchUrlRepository struct {
@@ -65,20 +65,35 @@ func (r *watchUrlRepository) FindBy(ctx context.Context, by primitive.M) ([]*mod
 		return nil, err
 	}
 
+	defer cursor.Close(ctx)
+
 	err = cursor.All(nil, &watchUrls)
 	return watchUrls, err
 }
 
-func (r *watchUrlRepository) FindAll(ctx context.Context, limit int64, skip int64) ([]*model.WatchUrl, error) {
+func (r *watchUrlRepository) FindAll(ctx context.Context, limit int64, skip int64) ([]*model.WatchUrl, int64, error) {
 	var watchUrls []*model.WatchUrl
 
 	opts := options.Find().SetSkip(skip).SetLimit(limit)
 	cursor, err := r.collection.Find(ctx, primitive.M{}, opts)
 
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
+	defer cursor.Close(ctx)
+
 	err = cursor.All(ctx, &watchUrls)
-	return watchUrls, err
+	if err != nil {
+		return nil, 0, err
+	}
+
+	total, err := r.collection.CountDocuments(ctx, primitive.M{})
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return watchUrls, total, err
+
 }

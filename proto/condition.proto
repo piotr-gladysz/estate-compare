@@ -13,6 +13,8 @@ message GetConditionRequest {
   string id = 1 [(buf.validate.field).string.min_len = 1];
 }
 
+
+
 message GetConditionsRequest {
   int32 page = 1 [(buf.validate.field).int32.gte = 1];
   int32 page_size = 2 [(buf.validate.field).int32.gte = 1];
@@ -27,11 +29,12 @@ message ConditionResponse {
 
 message ConditionsListResponse {
   repeated ConditionResponse conditions = 1;
-  int32 total = 2;
+  int64 total = 2;
 }
 
 service ConditionService {
   rpc AddCondition(AddConditionRequest) returns (ConditionResponse);
   rpc GetCondition(GetConditionRequest) returns (ConditionResponse);
   rpc GetConditions(GetConditionsRequest) returns (ConditionsListResponse);
+  rpc DeleteCondition(GetConditionRequest) returns (ConditionResponse);
 }

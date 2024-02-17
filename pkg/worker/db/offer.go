@@ -63,6 +63,8 @@ func (r *offerRepository) FindAll(ctx context.Context, limit int64, skip int64) 
 		return nil, err
 	}
 
+	defer cursor.Close(ctx)
+
 	err = cursor.All(nil, &offers)
 	return offers, err
 }

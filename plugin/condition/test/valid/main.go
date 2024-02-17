@@ -41,7 +41,8 @@ func CheckCondition(offerPtr, configPtr uint64) uint64 {
 		Message: "Offer: " + offer.Name +
 			"\nUrl: " + offer.Url +
 			"\nHistory len: " + fmt.Sprintf("%d", len(offer.History)) +
-			"\nHistory: " + fmt.Sprintf("%v+", offer.History),
+			"\nHistory: " + fmt.Sprintf("%v+", offer.History) +
+			"\nConfig: " + fmt.Sprintf("%v+", config),
 	}
 
 	retPtr, err := wasmutil.ObjToPtr(notif)

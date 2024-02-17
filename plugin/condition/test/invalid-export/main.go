@@ -4,7 +4,7 @@ package main
 import "C"
 
 //export NotCheckCondition
-func NotCheckCondition(offerPtr, configPtr uint64) uint32 {
+func NotCheckCondition(offerPtr, configPtr uint64) uint64 {
 	return 0
 }
 

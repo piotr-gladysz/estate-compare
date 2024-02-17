@@ -62,7 +62,8 @@ type SentNotification struct {
 	OfferId        primitive.ObjectID `json:"offerId" bson:"offerId"`
 	NotificationId primitive.ObjectID `json:"notificationId" bson:"notificationId"`
 
-	Message string `json:"message" bson:"message"`
+	Message       string         `json:"message" bson:"message"`
+	SendingStatus map[string]any `json:"sendingStatus" bson:"sendingStatus"`
 }
 
 type WatchUrl struct {

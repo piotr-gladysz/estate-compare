@@ -19,9 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	ConditionService_AddCondition_FullMethodName  = "/api.ConditionService/AddCondition"
-	ConditionService_GetCondition_FullMethodName  = "/api.ConditionService/GetCondition"
-	ConditionService_GetConditions_FullMethodName = "/api.ConditionService/GetConditions"
+	ConditionService_AddCondition_FullMethodName    = "/api.ConditionService/AddCondition"
+	ConditionService_GetCondition_FullMethodName    = "/api.ConditionService/GetCondition"
+	ConditionService_GetConditions_FullMethodName   = "/api.ConditionService/GetConditions"
+	ConditionService_DeleteCondition_FullMethodName = "/api.ConditionService/DeleteCondition"
 )
 
 // ConditionServiceClient is the client API for ConditionService service.
@@ -31,6 +32,7 @@ type ConditionServiceClient interface {
 	AddCondition(ctx context.Context, in *AddConditionRequest, opts ...grpc.CallOption) (*ConditionResponse, error)
 	GetCondition(ctx context.Context, in *GetConditionRequest, opts ...grpc.CallOption) (*ConditionResponse, error)
 	GetConditions(ctx context.Context, in *GetConditionsRequest, opts ...grpc.CallOption) (*ConditionsListResponse, error)
+	DeleteCondition(ctx context.Context, in *GetConditionRequest, opts ...grpc.CallOption) (*ConditionResponse, error)
 }
 
 type conditionServiceClient struct {
@@ -68,6 +70,15 @@ func (c *conditionServiceClient) GetConditions(ctx context.Context, in *GetCondi
 	return out, nil
 }
 
+func (c *conditionServiceClient) DeleteCondition(ctx context.Context, in *GetConditionRequest, opts ...grpc.CallOption) (*ConditionResponse, error) {
+	out := new(ConditionResponse)
+	err := c.cc.Invoke(ctx, ConditionService_DeleteCondition_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ConditionServiceServer is the server API for ConditionService service.
 // All implementations must embed UnimplementedConditionServiceServer
 // for forward compatibility
@@ -75,6 +86,7 @@ type ConditionServiceServer interface {
 	AddCondition(context.Context, *AddConditionRequest) (*ConditionResponse, error)
 	GetCondition(context.Context, *GetConditionRequest) (*ConditionResponse, error)
 	GetConditions(context.Context, *GetConditionsRequest) (*ConditionsListResponse, error)
+	DeleteCondition(context.Context, *GetConditionRequest) (*ConditionResponse, error)
 	mustEmbedUnimplementedConditionServiceServer()
 }
 
@@ -90,6 +102,9 @@ func (UnimplementedConditionServiceServer) GetCondition(context.Context, *GetCon
 }
 func (UnimplementedConditionServiceServer) GetConditions(context.Context, *GetConditionsRequest) (*ConditionsListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConditions not implemented")
+}
+func (UnimplementedConditionServiceServer) DeleteCondition(context.Context, *GetConditionRequest) (*ConditionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCondition not implemented")
 }
 func (UnimplementedConditionServiceServer) mustEmbedUnimplementedConditionServiceServer() {}
 
@@ -158,6 +173,24 @@ func _ConditionService_GetConditions_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ConditionService_DeleteCondition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetConditionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConditionServiceServer).DeleteCondition(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ConditionService_DeleteCondition_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConditionServiceServer).DeleteCondition(ctx, req.(*GetConditionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ConditionService_ServiceDesc is the grpc.ServiceDesc for ConditionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -176,6 +209,10 @@ var ConditionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetConditions",
 			Handler:    _ConditionService_GetConditions_Handler,
+		},
+		{
+			MethodName: "DeleteCondition",
+			Handler:    _ConditionService_DeleteCondition_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -91,3 +91,22 @@ func drawProcessorStatus(writer io.Writer, state *api.ProcessingStatus) {
 
 	t.Render()
 }
+
+func drawConditionList(writer io.Writer, conditions []*api.ConditionResponse) {
+	t := table.NewWriter()
+	t.SetOutputMirror(writer)
+	t.AppendHeader(table.Row{"#", "Id", "Name", "Created", "Updated"})
+
+	for i, condition := range conditions {
+		t.AppendRow(
+			table.Row{
+				i,
+				condition.Id,
+				condition.Name,
+				time.Unix(condition.Created, 0).Format(time.RFC3339),
+				time.Unix(condition.Updated, 0).Format(time.RFC3339),
+			})
+	}
+
+	t.Render()
+}

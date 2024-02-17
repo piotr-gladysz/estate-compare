@@ -34,7 +34,7 @@ build-plugins:
 test:
 #	docker-compose -f docker-compose.test.yml up -d
 #	while ! nc -z 127.0.0.1 27017; do sleep 1; echo "Waiting for port..."; done;
-	go test -v ./pkg/...
+	go test -v -count=1 ./pkg/...
 #	docker-compose -f docker-compose.test.yml down
 
 benchmark:

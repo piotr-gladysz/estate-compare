@@ -2,9 +2,12 @@ package testutils
 
 import (
 	"context"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/db"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/db/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+var _ db.WatchUrlRepository = (*WatchUrlRepositoryMock)(nil)
 
 type WatchUrlRepositoryMock struct {
 	Callback     func(this *WatchUrlRepositoryMock, method string, args ...any)
@@ -61,10 +64,10 @@ func (w *WatchUrlRepositoryMock) FindBy(ctx context.Context, by primitive.M) ([]
 	return w.ReturnMany, w.ReturnError
 }
 
-func (w *WatchUrlRepositoryMock) FindAll(ctx context.Context, limit int64, skip int64) ([]*model.WatchUrl, error) {
+func (w *WatchUrlRepositoryMock) FindAll(ctx context.Context, limit int64, skip int64) ([]*model.WatchUrl, int64, error) {
 	if w.Callback != nil {
 		w.Callback(w, "FindAll", limit, skip)
 	}
 
-	return w.ReturnMany, w.ReturnError
+	return w.ReturnMany, int64(len(w.ReturnMany)), w.ReturnError
 }

@@ -13,9 +13,7 @@ import (
 var ServerNotRunningError = errors.New("server not running")
 
 type Server struct {
-	watchUrlRepo db.WatchUrlRepository
-	offerRepo    db.OfferRepository
-
+	db      db.DB
 	control ProcessorControl
 
 	port int
@@ -25,8 +23,8 @@ type Server struct {
 	listener net.Listener
 }
 
-func NewServer(port int, ip string, watchUrlRepo db.WatchUrlRepository, offerRepo db.OfferRepository, control ProcessorControl) *Server {
-	return &Server{watchUrlRepo: watchUrlRepo, offerRepo: offerRepo, control: control, port: port, ip: ip}
+func NewServer(port int, ip string, db db.DB, control ProcessorControl) *Server {
+	return &Server{db: db, control: control, port: port, ip: ip}
 }
 
 func (s *Server) Run() error {
@@ -37,9 +35,10 @@ func (s *Server) Run() error {
 
 	grpcServer := grpc.NewServer()
 
-	api.RegisterWatchUrlServiceServer(grpcServer, NewWatchUrlServer(s.watchUrlRepo))
-	api.RegisterOfferServiceServer(grpcServer, NewOfferServer(s.offerRepo))
+	api.RegisterWatchUrlServiceServer(grpcServer, NewWatchUrlServer(s.db.GetWatchUrlRepository()))
+	api.RegisterOfferServiceServer(grpcServer, NewOfferServer(s.db.GetOfferRepository()))
 	api.RegisterProcessorServiceServer(grpcServer, NewProcessorServer(s.control))
+	api.RegisterConditionServiceServer(grpcServer, NewConditionServer(s.db.GetConditionRepository(), s.db.GetNotificationRepository()))
 
 	s.listener = lis
 	s.server = grpcServer

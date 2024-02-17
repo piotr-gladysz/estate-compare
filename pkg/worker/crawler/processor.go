@@ -225,6 +225,7 @@ func (s *SitesProcessor) MapOfferToDB(offer *Offer, url string) *model.Offer {
 		SiteId:         offer.SiteId,
 		Site:           offer.Site,
 		Updated:        primitive.NewDateTimeFromTime(offer.UpdateTime),
+		Created:        primitive.NewDateTimeFromTime(offer.UpdateTime),
 		Name:           offer.Name,
 		Url:            url,
 		Area:           offer.Area,

@@ -70,7 +70,7 @@ func (w *WatchUrlServer) GetUrls(ctx context.Context, request *api.GetUrlsReques
 	limit := request.PageSize
 	skip := (request.Page - 1) * request.PageSize
 
-	urls, err := w.repo.FindAll(ctx, int64(skip), int64(limit))
+	urls, total, err := w.repo.FindAll(ctx, int64(skip), int64(limit))
 
 	if err != nil {
 		return nil, err
@@ -83,7 +83,8 @@ func (w *WatchUrlServer) GetUrls(ctx context.Context, request *api.GetUrlsReques
 	}
 
 	return &api.UrlListResponse{
-		Urls: urlResponses,
+		Urls:  urlResponses,
+		Total: total,
 	}, nil
 }
 
