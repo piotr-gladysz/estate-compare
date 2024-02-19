@@ -4,6 +4,15 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 
 // Separated package for smaller import
 
+type OfferAction int32
+
+const (
+	OfferActionAdd         OfferAction = 1
+	OfferActionUpdate      OfferAction = 2 // Unused
+	OfferActionPriceChange OfferAction = 3
+	OfferActionSame        OfferAction = 4
+)
+
 type Offer struct {
 	ID primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 
@@ -49,6 +58,7 @@ type Notification struct {
 	Updated primitive.DateTime `json:"updated" bson:"updated"`
 	Created primitive.DateTime `json:"created" bson:"created"`
 
+	Name        string             `json:"name" bson:"name"`
 	ConditionId primitive.ObjectID `json:"conditionId" bson:"conditionId"`
 	Config      map[string]any     `json:"config" bson:"config"`
 }
@@ -62,8 +72,9 @@ type SentNotification struct {
 	OfferId        primitive.ObjectID `json:"offerId" bson:"offerId"`
 	NotificationId primitive.ObjectID `json:"notificationId" bson:"notificationId"`
 
-	Message       string         `json:"message" bson:"message"`
-	SendingStatus map[string]any `json:"sendingStatus" bson:"sendingStatus"`
+	Message          string         `json:"message" bson:"message"`
+	SentSuccessfully bool           `json:"sentSuccessfully" bson:"sentSuccessfully"`
+	SendingStatus    map[string]any `json:"sendingStatus" bson:"sendingStatus"`
 }
 
 type WatchUrl struct {

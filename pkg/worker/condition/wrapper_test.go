@@ -18,8 +18,7 @@ func TestWrapper_CheckOffer(t *testing.T) {
 	ctx := context.Background()
 	wrapper, err := createExampleWrapper(ctx)
 	if err != nil {
-		t.Error("failed to create wrapper", err.Error())
-		return
+		t.Fatal("failed to create wrapper", err.Error())
 	}
 
 	defer wrapper.Close(ctx)
@@ -104,8 +103,7 @@ func BenchmarkWrapper_CheckOffer(b *testing.B) {
 	wrapper, err := createExampleWrapper(ctx)
 
 	if err != nil {
-		b.Error("failed to create wrapper", err)
-		return
+		b.Fatal("failed to create wrapper", err)
 
 	}
 
@@ -134,7 +132,7 @@ func BenchmarkWrapper_CheckOffer(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i++ {
-		_, err = wrapper.CheckOffer(ctx, testOffer, config)
+		_, err = wrapper.CheckOffer(ctx, testOffer, model.OfferActionAdd, config)
 
 		if err != nil {
 			b.Error("failed to check offer", err)
@@ -189,7 +187,7 @@ func testFullProcess() []error {
 
 	testOffer := createTestOffer(ti)
 
-	ret, err := wrapper.CheckOffer(ctx, testOffer, config)
+	ret, err := wrapper.CheckOffer(ctx, testOffer, model.OfferActionAdd, config)
 
 	if err != nil {
 		return []error{errors.Join(errors.New("failed to check offer"), err)}

@@ -74,7 +74,10 @@ func NewWrapper(ctx context.Context, reader io.Reader) (*Wrapper, error) {
 	}, nil
 }
 
-func (w *Wrapper) CheckOffer(ctx context.Context, offer *model.Offer, config map[string]any) (*model.SentNotification, error) {
+func (w *Wrapper) CheckOffer(ctx context.Context, offer *model.Offer, action model.OfferAction, config map[string]any) (*model.SentNotification, error) {
+
+	// TODO: pass action to wasm plugin
+
 	offerPtr, err := ObjToPointer(ctx, w.module, offer)
 	if err != nil {
 		return nil, err
