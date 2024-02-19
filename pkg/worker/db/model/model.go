@@ -4,7 +4,7 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 
 // Separated package for smaller import
 
-type OfferAction int32
+type OfferAction uint32
 
 const (
 	OfferActionAdd         OfferAction = 1

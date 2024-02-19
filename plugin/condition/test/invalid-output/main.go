@@ -4,7 +4,7 @@ package main
 import "C"
 
 //export CheckCondition
-func CheckCondition(offerPtr, configPtr uint64) uint32 {
+func CheckCondition(offerPtr, configPtr, action uint64) uint32 {
 
 	return 0
 }

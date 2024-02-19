@@ -33,7 +33,6 @@ func NewNotifier(d db.DB, conditionRegistry *condition.Registry, senderRegistry 
 func (n *Notifier) TrySendNotification(ctx context.Context, offer *model.Offer, action model.OfferAction) error {
 
 	skip := int64(0)
-
 	succeed := false
 
 	for {
@@ -49,7 +48,6 @@ func (n *Notifier) TrySendNotification(ctx context.Context, offer *model.Offer, 
 		}
 
 		for _, notif := range notifs {
-
 			sentNotif, err := n.processNotification(ctx, notif, offer, action)
 
 			if err != nil {
@@ -57,12 +55,20 @@ func (n *Notifier) TrySendNotification(ctx context.Context, offer *model.Offer, 
 				continue
 			}
 
-			if sentNotif != nil {
+			err = n.sentNotificationRepo.Insert(ctx, sentNotif, notif, offer)
 
+			if err != nil {
+				slog.Error("failed to insert sent notification", "error", err.Error())
+				continue
 			}
 
-			succeed = true
-
+			if sentNotif != nil {
+				if n.sendNotification(ctx, sentNotif, offer) {
+					succeed = true
+				}
+			} else {
+				succeed = true
+			}
 		}
 	}
 
@@ -88,7 +94,20 @@ func (n *Notifier) processNotification(ctx context.Context, notif *model.Notific
 	return wrapper.CheckOffer(ctx, offer, action, notif.Config)
 }
 
-func (n *Notifier) sendNotification(ctx context.Context, notif *model.SentNotification) error {
-	// TODO: body
-	return nil
+func (n *Notifier) sendNotification(ctx context.Context, sentNotif *model.SentNotification, offer *model.Offer) bool {
+	sentNotif, err := n.senderRegistry.SendNotification(ctx, sentNotif, offer)
+
+	updateErr := n.sentNotificationRepo.Update(ctx, sentNotif)
+
+	if updateErr != nil {
+		slog.Error("failed to update sent notification", "error", updateErr.Error())
+		return false
+	}
+
+	if err != nil {
+		slog.Error("failed to send notification", "error", err.Error())
+		return false
+	}
+
+	return sentNotif.SentSuccessfully
 }

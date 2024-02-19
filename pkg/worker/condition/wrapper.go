@@ -56,7 +56,7 @@ func NewWrapper(ctx context.Context, reader io.Reader) (*Wrapper, error) {
 
 	funcParams := checkFunc.Definition().ParamTypes()
 
-	if len(funcParams) != 2 || funcParams[0] != api.ValueTypeI64 || funcParams[1] != api.ValueTypeI64 {
+	if len(funcParams) != 3 || funcParams[0] != api.ValueTypeI64 || funcParams[1] != api.ValueTypeI64 || funcParams[2] != api.ValueTypeI64 {
 		return nil, InvalidFunctionDefinitionError
 	}
 
@@ -66,8 +66,6 @@ func NewWrapper(ctx context.Context, reader io.Reader) (*Wrapper, error) {
 		return nil, InvalidFunctionDefinitionError
 	}
 
-	//TODO: check parameters type of checkFunc
-
 	return &Wrapper{
 		module:    module,
 		checkFunc: checkFunc,
@@ -75,8 +73,6 @@ func NewWrapper(ctx context.Context, reader io.Reader) (*Wrapper, error) {
 }
 
 func (w *Wrapper) CheckOffer(ctx context.Context, offer *model.Offer, action model.OfferAction, config map[string]any) (*model.SentNotification, error) {
-
-	// TODO: pass action to wasm plugin
 
 	offerPtr, err := ObjToPointer(ctx, w.module, offer)
 	if err != nil {
@@ -88,7 +84,7 @@ func (w *Wrapper) CheckOffer(ctx context.Context, offer *model.Offer, action mod
 		return nil, err
 	}
 
-	retPtr, err := w.checkFunc.Call(ctx, offerPtr, configPtr)
+	retPtr, err := w.checkFunc.Call(ctx, offerPtr, configPtr, uint64(action))
 	if err != nil {
 		return nil, err
 	}
@@ -104,6 +100,8 @@ func (w *Wrapper) CheckOffer(ctx context.Context, offer *model.Offer, action mod
 		return nil, err
 
 	}
+
+	ret.SendingStatus = make(map[string]any)
 
 	return &ret, nil
 }
