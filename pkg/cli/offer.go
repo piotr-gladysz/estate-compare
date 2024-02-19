@@ -10,7 +10,7 @@ func newGetOfferCmd() *cobra.Command {
 	var id string
 
 	cmd := &cobra.Command{
-		Use:   "offer",
+		Use:   "get",
 		Short: "Get offer",
 		Long:  "Get offer",
 		RunE: func(cmd *cobra.Command, args []string) error {

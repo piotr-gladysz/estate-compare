@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	_ "github.com/piotr-gladysz/estate-compare/pkg/hack/pprof"
+	_ "github.com/piotr-gladysz/estate-compare/pkg/util/hack/pprof"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/admin"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/condition"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/crawler"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/db"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/notification"
 	"log/slog"
 	"os"
 )
@@ -47,15 +49,23 @@ func main() {
 		}
 	}()
 
+	conditionRegistry := condition.NewConditionRegistry(d.GetConditionRepository())
+	senderRegistry := notification.NewSenderRegistry()
+
+	notifier := notification.NewNotifier(d, conditionRegistry, senderRegistry)
+
+	factoryRegistry := crawler.NewCrawlerFactoryRegistry()
+
 	processor := crawler.NewSitesProcessor(
 		ctx,
-		crawler.NewCrawlerFactoryRegistry(),
+		factoryRegistry,
+		notifier,
 		d.GetWatchUrlRepository(),
 		d.GetOfferRepository(),
 	)
 
 	if conf.ServerEnabled {
-		server := admin.NewServer(conf.ServerPort, conf.ServerIp, d.GetWatchUrlRepository(), d.GetOfferRepository(), processor)
+		server := admin.NewServer(conf.ServerPort, conf.ServerIp, d, processor)
 		err = server.Run()
 		if err != nil {
 			slog.Error("failed to run server", "error", err.Error())

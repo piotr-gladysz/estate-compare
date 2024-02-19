@@ -6,9 +6,12 @@ require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.31.0-20231115204500-e097f827e652.2
 	github.com/go-co-op/gocron/v2 v2.1.1
 	github.com/jedib0t/go-pretty/v6 v6.4.9
+	github.com/pkg/errors v0.9.1
+	github.com/shamaton/msgpack/v2 v2.1.1
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.1
 	github.com/tebeka/selenium v0.9.9
+	github.com/tetratelabs/wazero v1.6.0
 	go.mongodb.org/mongo-driver v1.13.1
 	google.golang.org/grpc v1.59.0
 	google.golang.org/protobuf v1.31.0

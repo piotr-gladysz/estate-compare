@@ -8,9 +8,11 @@ import (
 )
 
 const (
-	alertsCollectionName    = "alerts"
-	offersCollectionName    = "offers"
-	watchUrlsCollectionName = "watch_urls"
+	offersCollectionName            = "offers"
+	watchUrlsCollectionName         = "watch_urls"
+	conditionsCollectionName        = "conditions"
+	notificationsCollectionName     = "notifications"
+	sentNotificationsCollectionName = "sent_notifications"
 )
 
 type dB struct {
@@ -19,9 +21,11 @@ type dB struct {
 }
 
 type DB interface {
-	GetAlertRepository() AlertRepository
 	GetOfferRepository() OfferRepository
 	GetWatchUrlRepository() WatchUrlRepository
+	GetConditionRepository() ConditionRepository
+	GetNotificationRepository() NotificationRepository
+	GetSentNotificationRepository() SentNotificationRepository
 	Close(ctx context.Context) error
 }
 
@@ -48,11 +52,6 @@ func (d *dB) Close(ctx context.Context) error {
 	return d.db.Disconnect(ctx)
 }
 
-func (d *dB) GetAlertRepository() AlertRepository {
-	// TODO: implement
-	return nil
-}
-
 func (d *dB) GetOfferRepository() OfferRepository {
 	return &offerRepository{collection: d.getCollection(offersCollectionName)}
 }
@@ -63,4 +62,16 @@ func (d *dB) GetWatchUrlRepository() WatchUrlRepository {
 
 func (d *dB) getCollection(collectionName string) *mongo.Collection {
 	return d.db.Database(d.databaseName).Collection(collectionName)
+}
+
+func (d *dB) GetConditionRepository() ConditionRepository {
+	return &conditionRepository{collection: d.getCollection(conditionsCollectionName)}
+}
+
+func (d *dB) GetNotificationRepository() NotificationRepository {
+	return &notificationRepository{collection: d.getCollection(notificationsCollectionName)}
+}
+
+func (d *dB) GetSentNotificationRepository() SentNotificationRepository {
+	return &sentNotificationRepository{collection: d.getCollection(sentNotificationsCollectionName)}
 }

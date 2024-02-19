@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/piotr-gladysz/estate-compare/pkg/api"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/db"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/db/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log/slog"
 )
@@ -38,7 +39,7 @@ func (o *OfferServer) GetOffers(ctx context.Context, request *api.GetOffersReque
 	limit := request.PageSize
 	skip := (request.Page - 1) * request.PageSize
 
-	ret, err := o.repo.FindAll(ctx, int64(skip), int64(limit))
+	ret, total, err := o.repo.FindAll(ctx, int64(skip), int64(limit))
 
 	if err != nil {
 		return nil, err
@@ -52,11 +53,12 @@ func (o *OfferServer) GetOffers(ctx context.Context, request *api.GetOffersReque
 
 	return &api.OfferListResponse{
 		Offers: offerResponses,
+		Total:  total,
 	}, nil
 
 }
 
-func (o *OfferServer) offerToResponse(offer *db.Offer, withHistory bool) *api.OfferResponse {
+func (o *OfferServer) offerToResponse(offer *model.Offer, withHistory bool) *api.OfferResponse {
 	ret := &api.OfferResponse{
 		Id:             offer.ID.Hex(),
 		SiteId:         offer.SiteId,

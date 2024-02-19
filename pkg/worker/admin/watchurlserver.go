@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/piotr-gladysz/estate-compare/pkg/api"
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/db"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/db/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log/slog"
 	"time"
@@ -21,7 +22,7 @@ func NewWatchUrlServer(repo db.WatchUrlRepository) *WatchUrlServer {
 func (w *WatchUrlServer) AddUrl(ctx context.Context, request *api.AddUrlRequest) (*api.UrlResponse, error) {
 
 	now := primitive.NewDateTimeFromTime(time.Now())
-	url := &db.WatchUrl{
+	url := &model.WatchUrl{
 		Url:      request.Url,
 		IsList:   request.IsList,
 		Created:  now,
@@ -69,7 +70,7 @@ func (w *WatchUrlServer) GetUrls(ctx context.Context, request *api.GetUrlsReques
 	limit := request.PageSize
 	skip := (request.Page - 1) * request.PageSize
 
-	urls, err := w.repo.FindAll(ctx, int64(skip), int64(limit))
+	urls, total, err := w.repo.FindAll(ctx, int64(skip), int64(limit))
 
 	if err != nil {
 		return nil, err
@@ -82,11 +83,12 @@ func (w *WatchUrlServer) GetUrls(ctx context.Context, request *api.GetUrlsReques
 	}
 
 	return &api.UrlListResponse{
-		Urls: urlResponses,
+		Urls:  urlResponses,
+		Total: total,
 	}, nil
 }
 
-func (w *WatchUrlServer) watchUrlToResponse(url *db.WatchUrl) *api.UrlResponse {
+func (w *WatchUrlServer) watchUrlToResponse(url *model.WatchUrl) *api.UrlResponse {
 	return &api.UrlResponse{
 		Url:        url.Url,
 		IsList:     url.IsList,

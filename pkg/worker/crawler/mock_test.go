@@ -1,6 +1,8 @@
 package crawler
 
 import (
+	"context"
+	"github.com/piotr-gladysz/estate-compare/pkg/worker/db/model"
 	"github.com/tebeka/selenium"
 )
 
@@ -32,6 +34,9 @@ type FactoryMock struct {
 	ReturnPageCrawler     *PageCrawlerMock
 	ReturnPageListCrawler *ListCrawlerMock
 	ReturnMatchType       MatchType
+}
+
+type NotificationSenderMock struct {
 }
 
 // PageCrawlerMock implementation
@@ -89,4 +94,11 @@ func (f FactoryMock) MatchUrl(s string) MatchType {
 	}
 
 	return f.ReturnMatchType
+}
+
+// NotificationSenderMock implementation
+// ------------------------------------
+
+func (n *NotificationSenderMock) TrySendNotification(ctx context.Context, offer *model.Offer, action model.OfferAction) error {
+	return nil
 }

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/piotr-gladysz/estate-compare/pkg/cli"
-	_ "github.com/piotr-gladysz/estate-compare/pkg/hack/pprof"
+	_ "github.com/piotr-gladysz/estate-compare/pkg/util/hack/pprof"
 )
 
 func main() {
