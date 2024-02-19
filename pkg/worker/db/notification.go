@@ -6,6 +6,7 @@ import (
 	"github.com/piotr-gladysz/estate-compare/pkg/worker/db/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var _ NotificationRepository = (*notificationRepository)(nil)
@@ -16,6 +17,7 @@ type NotificationRepository interface {
 	Insert(ctx context.Context, notification *model.Notification, condition *model.Condition) error
 	Delete(ctx context.Context, id primitive.ObjectID) error
 	FindBy(ctx context.Context, by primitive.M) ([]*model.Notification, error)
+	FindAll(ctx context.Context, limit int64, skip int64) ([]*model.Notification, int64, error)
 }
 
 type notificationRepository struct {
@@ -50,4 +52,26 @@ func (r *notificationRepository) FindBy(ctx context.Context, by primitive.M) ([]
 
 	err = cursor.All(nil, &notifications)
 	return notifications, err
+}
+
+func (r *notificationRepository) FindAll(ctx context.Context, limit int64, skip int64) ([]*model.Notification, int64, error) {
+	var notifications []*model.Notification
+
+	cursor, err := r.collection.Find(ctx, primitive.M{}, options.Find().SetLimit(limit).SetSkip(skip))
+	if err != nil {
+		return nil, 0, err
+	}
+	defer cursor.Close(ctx)
+
+	err = cursor.All(nil, &notifications)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	total, err := r.collection.CountDocuments(ctx, primitive.M{})
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return notifications, total, err
 }

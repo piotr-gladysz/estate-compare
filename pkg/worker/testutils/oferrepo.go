@@ -53,9 +53,9 @@ func (m *OfferRepositoryMock) FindBy(ctx context.Context, by primitive.M) ([]*mo
 	return m.ReturnMany, m.ReturnError
 }
 
-func (m *OfferRepositoryMock) FindAll(ctx context.Context, limit int64, skip int64) ([]*model.Offer, error) {
+func (m *OfferRepositoryMock) FindAll(ctx context.Context, limit int64, skip int64) ([]*model.Offer, int64, error) {
 	if m.Callback != nil {
 		m.Callback(m, "FindAll", limit, skip)
 	}
-	return m.ReturnMany, m.ReturnError
+	return m.ReturnMany, int64(len(m.ReturnMany)), m.ReturnError
 }

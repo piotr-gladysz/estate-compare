@@ -39,7 +39,7 @@ func (o *OfferServer) GetOffers(ctx context.Context, request *api.GetOffersReque
 	limit := request.PageSize
 	skip := (request.Page - 1) * request.PageSize
 
-	ret, err := o.repo.FindAll(ctx, int64(skip), int64(limit))
+	ret, total, err := o.repo.FindAll(ctx, int64(skip), int64(limit))
 
 	if err != nil {
 		return nil, err
@@ -53,6 +53,7 @@ func (o *OfferServer) GetOffers(ctx context.Context, request *api.GetOffersReque
 
 	return &api.OfferListResponse{
 		Offers: offerResponses,
+		Total:  total,
 	}, nil
 
 }

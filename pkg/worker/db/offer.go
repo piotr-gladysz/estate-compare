@@ -16,7 +16,7 @@ type OfferRepository interface {
 	Delete(ctx context.Context, id primitive.ObjectID) error
 	FindById(ctx context.Context, id primitive.ObjectID) (*model.Offer, error)
 	FindBy(ctx context.Context, by primitive.M) ([]*model.Offer, error)
-	FindAll(ctx context.Context, limit int64, skip int64) ([]*model.Offer, error)
+	FindAll(ctx context.Context, limit int64, skip int64) ([]*model.Offer, int64, error)
 }
 
 type offerRepository struct {
@@ -56,15 +56,24 @@ func (r *offerRepository) FindBy(ctx context.Context, by primitive.M) ([]*model.
 	return offers, err
 }
 
-func (r *offerRepository) FindAll(ctx context.Context, limit int64, skip int64) ([]*model.Offer, error) {
+func (r *offerRepository) FindAll(ctx context.Context, limit int64, skip int64) ([]*model.Offer, int64, error) {
 	var offers []*model.Offer
 	cursor, err := r.collection.Find(ctx, primitive.M{}, options.Find().SetLimit(limit).SetSkip(skip))
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	defer cursor.Close(ctx)
 
 	err = cursor.All(nil, &offers)
-	return offers, err
+	if err != nil {
+		return nil, 0, err
+	}
+
+	total, err := r.collection.CountDocuments(ctx, primitive.M{})
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return offers, total, err
 }
