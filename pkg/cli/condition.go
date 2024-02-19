@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func newCreateConditionCmd() *cobra.Command {
+func newAddConditionCmd() *cobra.Command {
 	var name string
 	var path string
 
@@ -127,6 +127,37 @@ func newListConditionCmd() *cobra.Command {
 
 	cmd.Flags().Int32VarP(&page, "page", "p", 1, "page number")
 	cmd.Flags().Int32VarP(&pageSize, "pageSize", "s", 10, "page size")
+
+	return cmd
+}
+
+func newDeleteConditionCmd() *cobra.Command {
+	var id string
+
+	cmd := &cobra.Command{
+		Use:   "delete",
+		Short: "Delete condition",
+		Long:  "Delete condition",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			conn, err := getHostConn()
+			if err != nil {
+				return err
+			}
+			client := api.NewConditionServiceClient(conn)
+			in := &api.GetConditionRequest{
+				Id: id,
+			}
+			_, err = client.DeleteCondition(cmd.Context(), in)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+	}
+
+	cmd.Flags().StringVarP(&id, "id", "i", "", "id of the condition")
+
+	cmd.MarkFlagRequired("id")
 
 	return cmd
 }

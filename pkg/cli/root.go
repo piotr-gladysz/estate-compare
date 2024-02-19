@@ -45,9 +45,20 @@ func CreateCLICommand() *cobra.Command {
 	processor.AddCommand(newProcessorStopCmd())
 	processor.AddCommand(newProcessorStatusCmd())
 
+	condition := &cobra.Command{
+		Use:   "condition",
+		Long:  "Condition commands",
+		Short: "Condition commands",
+	}
+
+	condition.AddCommand(newAddConditionCmd())
+	condition.AddCommand(newListConditionCmd())
+	condition.AddCommand(newGetConditionCmd())
+
 	root.AddCommand(watchUrl)
 	root.AddCommand(offer)
 	root.AddCommand(processor)
+	root.AddCommand(condition)
 
 	return root
 }
