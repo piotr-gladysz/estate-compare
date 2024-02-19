@@ -1,0 +1,44 @@
+syntax = "proto3";
+package api;
+
+import "google/protobuf/timestamp.proto";
+import "buf/validate/validate.proto";
+
+
+message CreateNotificationRequest {
+  string name = 1;
+  string condition_id = 2;
+  string config = 3;
+}
+
+message GetNotificationRequest {
+  int32 page = 1 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 2 [(buf.validate.field).int32.gte = 1];
+}
+
+message GetNotificationsRequest {
+  int32 page = 1 [(buf.validate.field).int32.gte = 1];
+  int32 page_size = 2 [(buf.validate.field).int32.gte = 1];
+}
+
+message NotificationResponse {
+  string id = 1;
+  string name = 2;
+  string condition_id = 3;
+  string config = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+
+message NotificationListResponse {
+  repeated NotificationResponse notifications = 1;
+  int64 total = 2;
+}
+
+service NotificationService {
+  rpc CreateNotification(CreateNotificationRequest) returns (NotificationResponse) {  }
+  rpc GetNotification(GetNotificationRequest) returns (NotificationResponse) {  }
+  rpc ListNotifications(GetNotificationsRequest) returns (NotificationListResponse) {  }
+  rpc DeleteNotification(GetNotificationRequest) returns (NotificationResponse) {  }
+}

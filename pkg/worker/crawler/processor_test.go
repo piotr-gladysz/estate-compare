@@ -38,10 +38,11 @@ func NewTestOffer() *Offer {
 func MockProcessor() (*SitesProcessor, *testutils.WatchUrlRepositoryMock, *testutils.OfferRepositoryMock) {
 	watchUrlRepo := &testutils.WatchUrlRepositoryMock{}
 	offerRepo := &testutils.OfferRepositoryMock{}
+	sender := &NotificationSenderMock{}
 
 	registry := NewCrawlerFactoryRegistry()
 
-	processor := NewSitesProcessor(context.TODO(), registry, watchUrlRepo, offerRepo)
+	processor := NewSitesProcessor(context.TODO(), registry, sender, watchUrlRepo, offerRepo)
 
 	return processor, watchUrlRepo, offerRepo
 }
@@ -123,7 +124,7 @@ func TestSitesProcessor_ProcessSite(t *testing.T) {
 	processor, _, offerRepo := MockProcessor()
 
 	factory := NewFactoryMock()
-	processor.registry.Register(factory)
+	processor.factoryRegistry.Register(factory)
 
 	matchCalled := false
 	crawlCalled := false
@@ -266,7 +267,7 @@ func TestSitesProcessor_ProcessSiteList(t *testing.T) {
 	processor, watchUrlRepo, _ := MockProcessor()
 
 	factory := NewFactoryMock()
-	processor.registry.Register(factory)
+	processor.factoryRegistry.Register(factory)
 
 	getUrlsCalled := 0
 	nextPageCalled := 0

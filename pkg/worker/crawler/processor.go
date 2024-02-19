@@ -19,10 +19,17 @@ import (
 
 var CrawlerNotFoundError = errors.New("crawler not found")
 
+type NotificationSender interface {
+	TrySendNotification(ctx context.Context, offer *model.Offer, action model.OfferAction) error
+}
+
 type SitesProcessor struct {
-	registry     *FactoryRegistry
+	factoryRegistry *FactoryRegistry
+
 	watchUrlRepo db.WatchUrlRepository
 	offerRepo    db.OfferRepository
+
+	sender NotificationSender
 
 	parentCtx context.Context
 
@@ -32,12 +39,14 @@ type SitesProcessor struct {
 	procCancel context.CancelFunc
 }
 
-func NewSitesProcessor(ctx context.Context, registry *FactoryRegistry, watchUrlRepo db.WatchUrlRepository, offerRepo db.OfferRepository) *SitesProcessor {
+func NewSitesProcessor(ctx context.Context, registry *FactoryRegistry, sender NotificationSender,
+	watchUrlRepo db.WatchUrlRepository, offerRepo db.OfferRepository) *SitesProcessor {
 	return &SitesProcessor{
-		registry:     registry,
-		watchUrlRepo: watchUrlRepo,
-		offerRepo:    offerRepo,
-		parentCtx:    ctx,
+		factoryRegistry: registry,
+		watchUrlRepo:    watchUrlRepo,
+		offerRepo:       offerRepo,
+		sender:          sender,
+		parentCtx:       ctx,
 	}
 }
 
@@ -135,7 +144,7 @@ func (s *SitesProcessor) Process() error {
 }
 
 func (s *SitesProcessor) ProcessSiteList(ctx context.Context, wd selenium.WebDriver, url string) error {
-	_, crawler := s.registry.GetCrawler(url)
+	_, crawler := s.factoryRegistry.GetCrawler(url)
 	if crawler == nil {
 		slog.Warn("failed to get crawler", "url", url, "error", CrawlerNotFoundError.Error())
 		return CrawlerNotFoundError
@@ -172,7 +181,7 @@ func (s *SitesProcessor) ProcessSiteList(ctx context.Context, wd selenium.WebDri
 }
 
 func (s *SitesProcessor) ProcessSite(ctx context.Context, wd selenium.WebDriver, url string) error {
-	crawler, _ := s.registry.GetCrawler(url)
+	crawler, _ := s.factoryRegistry.GetCrawler(url)
 	if crawler == nil {
 		slog.Warn("failed to get crawler", "url", url, "error", CrawlerNotFoundError.Error())
 		return CrawlerNotFoundError
@@ -197,13 +206,14 @@ func (s *SitesProcessor) ProcessSite(ctx context.Context, wd selenium.WebDriver,
 			slog.Warn("failed to insert offer", "url", url, "error", err.Error())
 			return err
 		}
-		return nil
+
+		return s.sender.TrySendNotification(ctx, dbOffer, model.OfferActionAdd)
 	}
 
 	existingOffer := existing[0]
 	history := existingOffer.History[len(existingOffer.History)-1]
 	if history.Price == offer.Price {
-		return nil
+		return s.sender.TrySendNotification(ctx, existingOffer, model.OfferActionSame)
 	}
 
 	existingOffer.Updated = primitive.NewDateTimeFromTime(offer.UpdateTime)
@@ -217,7 +227,7 @@ func (s *SitesProcessor) ProcessSite(ctx context.Context, wd selenium.WebDriver,
 		return err
 	}
 
-	return nil
+	return s.sender.TrySendNotification(ctx, existingOffer, model.OfferActionPriceChange)
 }
 
 func (s *SitesProcessor) MapOfferToDB(offer *Offer, url string) *model.Offer {
