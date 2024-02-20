@@ -1,7 +1,6 @@
 package main
 
-// #include <stdlib.h>
-import "C"
+// Test plugin which doesn't export valid function (CheckCondition)
 
 //export NotCheckCondition
 func NotCheckCondition(offerPtr, configPtr, action uint64) uint64 {

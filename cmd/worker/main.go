@@ -50,9 +50,9 @@ func main() {
 	}()
 
 	conditionRegistry := condition.NewConditionRegistry(d.GetConditionRepository())
-	senderRegistry := notification.NewSenderRegistry()
+	channelRegistry := notification.NewChannelRegistry()
 
-	notifier := notification.NewNotifier(d, conditionRegistry, senderRegistry)
+	notifier := notification.NewNotifier(d, conditionRegistry, channelRegistry)
 
 	factoryRegistry := crawler.NewCrawlerFactoryRegistry()
 

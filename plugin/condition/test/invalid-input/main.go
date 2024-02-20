@@ -1,7 +1,6 @@
 package main
 
-// #include <stdlib.h>
-import "C"
+// Test plugin which exports valid function but with invalid arguments
 
 //export CheckCondition
 func CheckCondition(offerPtr uint32) uint64 {
