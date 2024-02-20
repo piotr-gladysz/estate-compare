@@ -17,10 +17,10 @@ type Notifier struct {
 	sentNotificationRepo db.SentNotificationRepository
 
 	conditionRegistry *condition.Registry
-	senderRegistry    *SenderRegistry
+	senderRegistry    *ChannelRegistry
 }
 
-func NewNotifier(d db.DB, conditionRegistry *condition.Registry, senderRegistry *SenderRegistry) *Notifier {
+func NewNotifier(d db.DB, conditionRegistry *condition.Registry, senderRegistry *ChannelRegistry) *Notifier {
 	return &Notifier{
 		conditionRepo:        d.GetConditionRepository(),
 		notificationRepo:     d.GetNotificationRepository(),

@@ -13,19 +13,37 @@ const (
 	CrawlerMatchList MatchType = 2
 )
 
+// PageCrawler is an interface for crawling single offer page
 type PageCrawler interface {
-	CrawlOffer(selenium.WebDriver, string) (*Offer, error)
+
+	// CrawlOffer should return Offer struct with all the data from the given url or error
+	CrawlOffer(wd selenium.WebDriver, url string) (*Offer, error)
 }
 
+// ListCrawler is an interface for crawling list of offers
 type ListCrawler interface {
-	GetUrls(selenium.WebDriver, string) ([]string, error)
-	NextPage(selenium.WebDriver, string) (string, error)
+
+	// GetUrls should return list of urls from the given url or error
+	GetUrls(wd selenium.WebDriver, url string) ([]string, error)
+
+	// NextPage should return next page url or error
+	NextPage(wd selenium.WebDriver, url string) (string, error)
 }
 
+// Factory is an interface for creating new crawlers and determining if the given url is supported
 type Factory interface {
+
+	// NewPageCrawler should return struct implementing PageCrawler interface
 	NewPageCrawler() PageCrawler
+
+	// NewListCrawler should return struct implementing ListCrawler interface
 	NewListCrawler() ListCrawler
-	MatchUrl(string) MatchType
+
+	// MatchUrl should return MatchType for the given url
+	// CrawlerMatchPage if the given url is supported by NewPageCrawler
+	// CrawlerMatchList if the given url is supported by NewListCrawler
+	// CrawlerNotMatch if the given url is not supported
+	MatchUrl(url string) MatchType
 }
 
 type Offer struct {

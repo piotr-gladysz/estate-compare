@@ -1,7 +1,6 @@
 package main
 
-// #include <stdlib.h>
-import "C"
+// Test plugin which exports valid function but with invalid return type
 
 //export CheckCondition
 func CheckCondition(offerPtr, configPtr, action uint64) uint32 {
